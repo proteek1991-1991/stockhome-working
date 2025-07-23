@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>StockHome</title>
+
+    
+
+    <!-- PWA Meta Tags -->
+
+    <meta name="theme-color" content="#3b82f6">
+
+    <meta name="description" content="AI-powered grocery inventory management with receipt scanning">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <meta name="apple-mobile-web-app-title" content="StockHome">
+
+    
+
+    <!-- PWA Manifest -->
+
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNtYXJ0IFBhbnRyeSAtIEdyb2NlcnkgSW52ZW50b3J5IiwKICAic2hvcnRfbmFtZSI6ICJTbWFydCBQYW50cnkiLAogICJkZXNjcmlwdGlvbiI6ICJBSS1wb3dlcmVkIGdyb2NlcnkgaW52ZW50b3J5IG1hbmFnZW1lbnQgd2l0aCByZWNlaXB0IHNjYW5uaW5nIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOWZhZmIiLAogICJ0aGVtZV9jb2xvciI6ICIjM2I4MmY2IiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQtcHJpbWFyeSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU5URXlJaUJvWldsbmFIUTlJalV4TWlJZ2RtbGxkMEp2ZUQwaU1DQXDJREF5TlRFeUlEVXhNaUlnWm1sc2JEMGlJek5pT0RKbU5pSStQSEpsWTNRZ2VEMGlOVFlpSUhrOUlqVTJJaUIzYVdSMGFEMGlORE13SWlCb1pXbG5hSFE5SWpRek1DSWdabWxzYkQwaWQyaHBkR1VpSUhKNFBTSXlNQ0kvUGp4MFpYaDBJSGc5SWpFMU5pSWdlVDBpTVRrd0lpQm1iMjUwTFdaaGJXbHNlVDBpUVhKcFlXd3NJRzF2Ym05emNHRmpZU0lnWm1sc2JEMGlJek14TVRneU55SWdkR1Y0ZEMxaGJtTm9iM0k5SW0xcFpHUnNaU0lnWm05dWRDMXphWHBsUFNKalpTSStQSFJ6Y0dGdVBqOHZQQzl6Y0dGdVBqd3ZkR1Y0ZEQ0OEwzTjJaejRzIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAibWFza2FibGUgYW55IgogICAgfQogIF0sCiAgInJlbGF0ZWRfYXBwbGljYXRpb25zIjogW10sCiAgInByZWZlcl9yZWxhdGVkX2FwcGxpY2F0aW9ucyI6IGZhbHNlCn0=">
+
+    
+
+    <!-- App Icons (Real favicon.io icons) -->
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+
+    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+
+
+
+    <style>
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+        }
+
+
+
+        body {
+
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+            background-color: #f9fafb;
+
+            min-height: 100vh;
+
+            user-select: none;
+
+            -webkit-user-select: none;
+
+            -webkit-touch-callout: none;
+
+        }
+
+
+
+        .container {
+
+            max-width: 448px;
+
+            margin: 0 auto;
+
+            background: white;
+
+            min-height: 100vh;
+
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+
+            position: relative;
+
+        }
+
+
+
+        /* Install Banner */
+
+        .install-banner {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+
+            color: white;
+
+            padding: 12px 16px;
+
+            text-align: center;
+
+            z-index: 1000;
+
+            font-size: 14px;
+
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+            display: none;
+
+        }
+
+
+
+        .install-banner.show {
+
+            display: block;
+
+        }
+
+
+
+        .install-btn {
+
+            background: white;
+
+            color: #3b82f6;
+
+            border: none;
+
+            padding: 6px 12px;
+
+            border-radius: 4px;
+
+            margin-left: 8px;
+
+            cursor: pointer;
+
+            font-weight: 500;
+
+            font-size: 12px;
+
+        }
+
+
+
+        .dismiss-btn {
+
+            background: transparent;
+
+            color: white;
+
+            border: 1px solid white;
+
+            padding: 6px 12px;
+
+            border-radius: 4px;
+
+            margin-left: 4px;
+
+            cursor: pointer;
+
+            font-size: 12px;
+
+        }
+
+
+
+        /* Header */
+
+        .header {
+
+            background: white;
+
+            border-bottom: 1px solid #e5e7eb;
+
+            padding: 16px;
+
+            text-align: center;
+
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 100;
+
+        }
+
+
+
+        .header h1 {
+
+            font-size: 20px;
+
+            font-weight: bold;
+
+            color: #111827;
+
+        }
+
+
+
+        /* Main Content */
+
+        .main-content {
+
+            padding: 20px;
+
+            padding-bottom: 100px;
+
+        }
+
+
+
+        /* Stats Grid */
+
+        .stats-grid {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 16px;
+
+            margin-bottom: 24px;
+
+        }
+
+
+
+        .stat-card {
+
+            padding: 16px;
+
+            border-radius: 8px;
+
+            color: white;
+
+            text-align: center;
+
+            background: linear-gradient(135deg, var(--bg-from), var(--bg-to));
+
+        }
+
+
+
+        .stat-card.green {
+
+            --bg-from: #22c55e;
+
+            --bg-to: #16a34a;
+
+        }
+
+
+
+        .stat-card.orange {
+
+            --bg-from: #f97316;
+
+            --bg-to: #ea580c;
+
+        }
+
+
+
+        .stat-card h3 {
+
+            font-size: 12px;
+
+            opacity: 0.9;
+
+            margin-bottom: 4px;
+
+        }
+
+
+
+        .stat-card .number {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+        }
+
+
+
+        /* Notifications */
+
+        .notifications {
+
+            background: white;
+
+            border-radius: 8px;
+
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+            padding: 16px;
+
+            margin-bottom: 24px;
+
+        }
+
+
+
+        .notifications h3 {
+
+            margin-bottom: 12px;
+
+            font-size: 18px;
+
+            font-weight: 600;
+
+        }
+
+
+
+        .notification {
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            border-left: 4px solid;
+
+            margin-bottom: 8px;
+
+        }
+
+
+
+        .notification.warning {
+
+            background: #fefce8;
+
+            border-color: #f59e0b;
+
+        }
+
+
+
+        .notification.alert {
+
+            background: #fef2f2;
+
+            border-color: #ef4444;
+
+        }
+
+
+
+        .notification p {
+
+            margin: 0;
+
+            font-size: 14px;
+
+        }
+
+
+
+        .notification .time {
+
+            font-size: 12px;
+
+            color: #6b7280;
+
+            margin-top: 4px;
+
+        }
+
+
+
+        /* Action Buttons */
+
+        .action-grid {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 16px;
+
+        }
+
+
+
+        .action-btn {
+
+            padding: 16px;
+
+            border-radius: 8px;
+
+            border: none;
+
+            color: white;
+
+            cursor: pointer;
+
+            text-align: center;
+
+            font-weight: 500;
+
+            transition: transform 0.1s;
+
+        }
+
+
+
+        .action-btn:active {
+
+            transform: scale(0.95);
+
+        }
+
+
+
+        .action-btn.blue {
+
+            background: #3b82f6;
+
+        }
+
+
+
+        .action-btn.purple {
+
+            background: #8b5cf6;
+
+        }
+
+
+
+        .action-btn .icon {
+
+            font-size: 24px;
+
+            margin-bottom: 8px;
+
+            display: block;
+
+        }
+
+
+
+        /* Bottom Navigation */
+
+        .bottom-nav {
+
+            position: fixed;
+
+            bottom: 0;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 100%;
+
+            max-width: 448px;
+
+            background: white;
+
+            border-top: 1px solid #e5e7eb;
+
+            padding: 8px 16px;
+
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+
+            z-index: 50;
+
+        }
+
+
+
+        .nav-items {
+
+            display: flex;
+
+            justify-content: space-around;
+
+        }
+
+
+
+        .nav-item {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            padding: 8px 12px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            color: #6b7280;
+
+            font-size: 12px;
+
+            font-weight: 500;
+
+            position: relative;
+
+            transition: all 0.1s;
+
+        }
+
+
+
+        .nav-item:active {
+
+            transform: scale(0.95);
+
+        }
+
+
+
+        .nav-item.active {
+
+            background: #dbeafe;
+
+            color: #2563eb;
+
+        }
+
+
+
+        .nav-item .icon {
+
+            font-size: 20px;
+
+            margin-bottom: 4px;
+
+        }
+
+
+
+        .nav-item .badge {
+
+            position: absolute;
+
+            top: -4px;
+
+            right: -4px;
+
+            background: #ef4444;
+
+            color: white;
+
+            font-size: 10px;
+
+            border-radius: 50%;
+
+            width: 16px;
+
+            height: 16px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+
+        /* Tabs Content */
+
+        .tab-content {
+
+            display: none;
+
+        }
+
+
+
+        .tab-content.active {
+
+            display: block;
+
+        }
+
+
+
+        /* Receipt Tab */
+
+        .camera-zone {
+
+            border: 2px dashed #d1d5db;
+
+            border-radius: 8px;
+
+            padding: 32px;
+
+            text-align: center;
+
+            background: #f9fafb;
+
+            margin-bottom: 24px;
+
+        }
+
+
+
+        .camera-zone .icon {
+
+            font-size: 48px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+
+        .camera-zone p {
+
+            color: #6b7280;
+
+            margin-bottom: 12px;
+
+        }
+
+
+
+        .camera-btn {
+
+            background: #3b82f6;
+
+            color: white;
+
+            padding: 8px 24px;
+
+            border-radius: 8px;
+
+            border: none;
+
+            cursor: pointer;
+
+            font-weight: 500;
+
+            transition: transform 0.1s;
+
+        }
+
+
+
+        .camera-btn:active {
+
+            transform: scale(0.95);
+
+        }
+
+
+
+        /* Inventory */
+
+        .inventory-item {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 16px;
+
+            border-bottom: 1px solid #f3f4f6;
+
+        }
+
+
+
+        .inventory-item:last-child {
+
+            border-bottom: none;
+
+        }
+
+
+
+        .item-info {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+
+
+        .status-dot {
+
+            width: 12px;
+
+            height: 12px;
+
+            border-radius: 50%;
+
+            margin-right: 12px;
+
+        }
+
+
+
+        .status-dot.green { background: #22c55e; }
+
+        .status-dot.yellow { background: #f59e0b; }
+
+        .status-dot.red { background: #ef4444; }
+
+
+
+        .item-details h4 {
+
+            margin: 0 0 4px 0;
+
+            font-weight: 500;
+
+        }
+
+
+
+        .item-details p {
+
+            margin: 0;
+
+            font-size: 14px;
+
+            color: #6b7280;
+
+        }
+
+
+
+        .item-quantity {
+
+            text-align: right;
+
+        }
+
+
+
+        .item-quantity .amount {
+
+            font-weight: 600;
+
+            margin-bottom: 4px;
+
+        }
+
+
+
+        .item-quantity .warning {
+
+            font-size: 12px;
+
+            color: #f59e0b;
+
+        }
+
+
+
+        /* Meal Input */
+
+        .meal-input {
+
+            margin-bottom: 16px;
+
+        }
+
+
+
+        .meal-input label {
+
+            display: block;
+
+            font-size: 14px;
+
+            font-weight: 500;
+
+            color: #374151;
+
+            margin-bottom: 8px;
+
+        }
+
+
+
+        .meal-input textarea {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 8px;
+
+            font-size: 16px;
+
+            resize: vertical;
+
+            min-height: 80px;
+
+        }
+
+
+
+        .meal-btn {
+
+            width: 100%;
+
+            background: #8b5cf6;
+
+            color: white;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            border: none;
+
+            cursor: pointer;
+
+            font-weight: 500;
+
+            margin-top: 8px;
+
+            transition: transform 0.1s;
+
+        }
+
+
+
+        .meal-btn:active {
+
+            transform: scale(0.98);
+
+        }
+
+
+
+        .meal-btn:disabled {
+
+            background: #d1d5db;
+
+            cursor: not-allowed;
+
+        }
+
+
+
+        .section-card {
+
+            background: white;
+
+            border-radius: 8px;
+
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+            margin-bottom: 16px;
+
+        }
+
+
+
+        .section-header {
+
+            padding: 16px;
+
+            border-bottom: 1px solid #e5e7eb;
+
+            font-size: 18px;
+
+            font-weight: 600;
+
+        }
+
+
+
+        .or-divider {
+
+            text-align: center;
+
+            color: #6b7280;
+
+            font-weight: 500;
+
+            margin: 16px 0;
+
+        }
+
+
+
+        /* PWA Enhancements */
+
+        @media (display-mode: standalone) {
+
+            .header {
+
+                padding-top: env(safe-area-inset-top, 16px);
+
+            }
+
+        }
+
+
+
+        /* Loading animation */
+
+        .loading {
+
+            display: inline-block;
+
+            width: 20px;
+
+            height: 20px;
+
+            border: 3px solid #f3f3f3;
+
+            border-top: 3px solid #3b82f6;
+
+            border-radius: 50%;
+
+            animation: spin 1s linear infinite;
+
+        }
+
+
+
+        @keyframes spin {
+
+            0% { transform: rotate(0deg); }
+
+            100% { transform: rotate(360deg); }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Install Banner -->
+
+    <div id="install-banner" class="install-banner">
+
+        <span>📱 Install StockHome for the best experience!</span>
+
+        <button class="install-btn" onclick="installApp()">Install</button>
+
+        <button class="dismiss-btn" onclick="dismissInstall()">Later</button>
+
+    </div>
+
+
+
+    <div class="container">
+
+        <!-- Header -->
+
+        <div class="header">
+
+            <h1>🏠 StockHome</h1>
+
+        </div>
+
+
+
+        <!-- Main Content -->
+
+        <div class="main-content">
+
+            <!-- Home Tab -->
+
+            <div id="home-tab" class="tab-content active">
+
+                <!-- Stats -->
+
+                <div class="stats-grid">
+
+                    <div class="stat-card green">
+
+                        <h3>Total Items</h3>
+
+                        <div class="number">4</div>
+
+                    </div>
+
+                    <div class="stat-card orange">
+
+                        <h3>Low Stock</h3>
+
+                        <div class="number">1</div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Notifications -->
+
+                <div class="notifications">
+
+                    <h3>🔔 Recent Notifications</h3>
+
+                    <div class="notification warning">
+
+                        <p>Bananas running low (6 left)</p>
+
+                        <p class="time">Just now</p>
+
+                    </div>
+
+                    <div class="notification alert">
+
+                        <p>Milk expires in 2 days</p>
+
+                        <p class="time">5 minutes ago</p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Quick Actions -->
+
+                <div class="action-grid">
+
+                    <button class="action-btn blue" onclick="showTab('receipt')">
+
+                        <span class="icon">📷</span>
+
+                        Scan Receipt
+
+                    </button>
+
+                    <button class="action-btn purple" onclick="showTab('meal')">
+
+                        <span class="icon">🍽️</span>
+
+                        Log Meal
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Receipt Tab -->
+
+            <div id="receipt-tab" class="tab-content">
+
+                <div class="section-card">
+
+                    <div class="section-header">📷 Scan Grocery Receipt</div>
+
+                    <div style="padding: 16px;">
+
+                        <div class="camera-zone">
+
+                            <div class="icon">📷</div>
+
+                            <p>Take a photo of your grocery receipt</p>
+
+                            <button class="camera-btn" onclick="simulateReceipt()">
+
+                                <span id="receipt-btn-text">Open Camera</span>
+
+                            </button>
+
+                            <p style="font-size: 12px; color: #9ca3af; margin-top: 12px;">
+
+                                AI will automatically extract items and update inventory
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Meal Tab -->
+
+            <div id="meal-tab" class="tab-content">
+
+                <div class="section-card">
+
+                    <div class="section-header">🍽️ Log Your Meal</div>
+
+                    <div style="padding: 16px;">
+
+                        <div class="camera-zone">
+
+                            <div class="icon">📷</div>
+
+                            <p>Take a photo of your meal</p>
+
+                            <button class="camera-btn" onclick="simulateMeal()">Take Photo</button>
+
+                        </div>
+
+                        
+
+                        <div class="or-divider">OR</div>
+
+                        
+
+                        <div class="meal-input">
+
+                            <label>Describe what you ate:</label>
+
+                            <textarea id="meal-text" placeholder="e.g., Spaghetti with ground beef and cheese..."></textarea>
+
+                            <button class="meal-btn" onclick="logMeal()">Log Meal</button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Inventory Tab -->
+
+            <div id="inventory-tab" class="tab-content">
+
+                <div class="section-card">
+
+                    <div class="section-header">📦 Current Inventory</div>
+
+                    <div class="inventory-item">
+
+                        <div class="item-info">
+
+                            <div class="status-dot red"></div>
+
+                            <div class="item-details">
+
+                                <h4>Bananas</h4>
+
+                                <p>Produce</p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="item-quantity">
+
+                            <div class="amount">6 pieces</div>
+
+                            <div class="warning">Low stock!</div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="inventory-item">
+
+                        <div class="item-info">
+
+                            <div class="status-dot yellow"></div>
+
+                            <div class="item-details">
+
+                                <h4>Milk</h4>
+
+                                <p>Dairy</p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="item-quantity">
+
+                            <div class="amount">1 gallon</div>
+
+                            <div class="warning">Expires in 5 days</div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="inventory-item">
+
+                        <div class="item-info">
+
+                            <div class="status-dot green"></div>
+
+                            <div class="item-details">
+
+                                <h4>Bread</h4>
+
+                                <p>Bakery</p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="item-quantity">
+
+                            <div class="amount">2 loaves</div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="inventory-item">
+
+                        <div class="item-info">
+
+                            <div class="status-dot green"></div>
+
+                            <div class="item-details">
+
+                                <h4>Toilet Paper</h4>
+
+                                <p>Household</p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="item-quantity">
+
+                            <div class="amount">8 rolls</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Notifications Tab -->
+
+            <div id="notifications-tab" class="tab-content">
+
+                <div class="section-card">
+
+                    <div class="section-header">🔔 All Notifications</div>
+
+                    <div class="notification warning">
+
+                        <p>Bananas running low (6 left)</p>
+
+                        <p class="time">Just now</p>
+
+                    </div>
+
+                    <div class="notification alert">
+
+                        <p>Milk expires in 2 days</p>
+
+                        <p class="time">5 minutes ago</p>
+
+                    </div>
+
+                    <div style="padding: 16px; text-align: center; color: #6b7280;">
+
+                        <p>No more notifications</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Bottom Navigation -->
+
+        <div class="bottom-nav">
+
+            <div class="nav-items">
+
+                <div class="nav-item active" onclick="showTab('home')">
+
+                    <span class="icon">🏠</span>
+
+                    <span>Home</span>
+
+                </div>
+
+                <div class="nav-item" onclick="showTab('receipt')">
+
+                    <span class="icon">📷</span>
+
+                    <span>Receipt</span>
+
+                </div>
+
+                <div class="nav-item" onclick="showTab('meal')">
+
+                    <span class="icon">🍽️</span>
+
+                    <span>Meal</span>
+
+                </div>
+
+                <div class="nav-item" onclick="showTab('inventory')">
+
+                    <span class="icon">📦</span>
+
+                    <span>Inventory</span>
+
+                </div>
+
+                <div class="nav-item" onclick="showTab('notifications')">
+
+                    <span class="icon">🔔</span>
+
+                    <span>Alerts</span>
+
+                    <span class="badge">2</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        // PWA Install functionality
+
+        let deferredPrompt;
+
+        let isInstallable = false;
+
+
+
+        // Show install banner after 3 seconds
+
+        setTimeout(() => {
+
+            if (!isStandalone() && !localStorage.getItem('install-dismissed')) {
+
+                document.getElementById('install-banner').classList.add('show');
+
+            }
+
+        }, 3000);
+
+
+
+        // Check if app is already installed
+
+        function isStandalone() {
+
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+        }
+
+
+
+        // Handle install prompt
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+
+            e.preventDefault();
+
+            deferredPrompt = e;
+
+            isInstallable = true;
+
+        });
+
+
+
+        function installApp() {
+
+            if (deferredPrompt) {
+
+                deferredPrompt.prompt();
+
+                deferredPrompt.userChoice.then((choiceResult) => {
+
+                    if (choiceResult.outcome === 'accepted') {
+
+                        console.log('User accepted the install prompt');
+
+                        showToast('StockHome installed successfully! 🎉');
+
+                    }
+
+                    deferredPrompt = null;
+
+                    dismissInstall();
+
+                });
+
+            } else if (isIOSSafari()) {
+
+                showIOSInstallInstructions();
+
+            } else {
+
+                showToast('App installation not available on this browser');
+
+            }
+
+        }
+
+
+
+        function dismissInstall() {
+
+            document.getElementById('install-banner').classList.remove('show');
+
+            localStorage.setItem('install-dismissed', 'true');
+
+        }
+
+
+
+        function isIOSSafari() {
+
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|mercury/.test(navigator.userAgent);
+
+        }
+
+
+
+        function showIOSInstallInstructions() {
+
+            alert('📱 To install StockHome on iPhone:\n\n1. Tap the Share button (⬆️)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install the app\n\nStockHome will appear on your home screen!');
+
+        }
+
+
+
+        function showToast(message) {
+
+            const toast = document.createElement('div');
+
+            toast.style.cssText = `
+
+                position: fixed;
+
+                top: 20px;
+
+                left: 50%;
+
+                transform: translateX(-50%);
+
+                background: #22c55e;
+
+                color: white;
+
+                padding: 12px 20px;
+
+                border-radius: 8px;
+
+                z-index: 10000;
+
+                font-size: 14px;
+
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+            `;
+
+            toast.textContent = message;
+
+            document.body.appendChild(toast);
+
+            
+
+            setTimeout(() => {
+
+                toast.remove();
+
+            }, 3000);
+
+        }
+
+
+
+        // Tab navigation
+
+        function showTab(tabName) {
+
+            // Hide all tabs
+
+            const tabs = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            
+
+            // Show selected tab
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            
+
+            // Update navigation
+
+            const navItems = document.querySelectorAll('.nav-item');
+
+            navItems.forEach(item => item.classList.remove('active'));
+
+            event.target.closest('.nav-item').classList.add('active');
+
+        }
+
+
+
+        function simulateReceipt() {
+
+            const btn = document.getElementById('receipt-btn-text');
+
+            const originalText = btn.textContent;
+
+            
+
+            btn.innerHTML = '<span class="loading"></span> Analyzing...';
+
+            
+
+            setTimeout(() => {
+
+                btn.textContent = originalText;
+
+                showToast('Receipt analyzed! 7 items added to inventory 📋');
+
+                
+
+                // Update stats
+
+                document.querySelector('.stat-card.green .number').textContent = '11';
+
+                
+
+                // Add new notification
+
+                const notifications = document.querySelector('.notifications');
+
+                const newNotification = document.createElement('div');
+
+                newNotification.className = 'notification';
+
+                newNotification.style.background = '#f0fdf4';
+
+                newNotification.style.borderColor = '#22c55e';
+
+                newNotification.innerHTML = `
+
+                    <p>Fresh Market receipt processed - 7 items added</p>
+
+                    <p class="time">Just now</p>
+
+                `;
+
+                notifications.insertBefore(newNotification, notifications.children[1]);
+
+            }, 2000);
+
+        }
+
+
+
+        function simulateMeal() {
+
+            showToast('Meal photo analyzed! Pasta ingredients deducted from inventory 🍝');
+
+        }
+
+
+
+        function logMeal() {
+
+            const mealText = document.getElementById('meal-text').value;
+
+            if (mealText.trim()) {
+
+                showToast(`Meal logged: "${mealText.slice(0, 20)}..." Inventory updated! 🍽️`);
+
+                document.getElementById('meal-text').value = '';
+
+            } else {
+
+                showToast('Please describe what you ate first! ⚠️');
+
+            }
+
+        }
+
+
+
+        // Handle app installation event
+
+        window.addEventListener('appinstalled', (evt) => {
+
+            showToast('StockHome installed successfully! 🎉');
+
+            dismissInstall();
+
+        });
+
+
+
+        // Service Worker Registration (disabled for CodePen - works when deployed)
+
+        if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.host.includes('codepen')) {
+
+            window.addEventListener('load', () => {
+
+                navigator.serviceWorker.register('/sw.js')
+
+                    .then((registration) => {
+
+                        console.log('SW registered: ', registration);
+
+                        showToast('App ready for offline use! 📱');
+
+                    })
+
+                    .catch((registrationError) => {
+
+                        console.log('SW registration failed: ', registrationError);
+
+                    });
+
+            });
+
+        }
+
+    </script>
+
+</body>
+
+</html>
