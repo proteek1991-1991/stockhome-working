@@ -1,1681 +1,1326 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>StockHome</title>
-
     
-
     <!-- PWA Meta Tags -->
-
     <meta name="theme-color" content="#3b82f6">
-
     <meta name="description" content="AI-powered grocery inventory management with receipt scanning">
-
     <meta name="apple-mobile-web-app-capable" content="yes">
-
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
     <meta name="apple-mobile-web-app-title" content="StockHome">
-
     
-
     <!-- PWA Manifest -->
-
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNtYXJ0IFBhbnRyeSAtIEdyb2NlcnkgSW52ZW50b3J5IiwKICAic2hvcnRfbmFtZSI6ICJTbWFydCBQYW50cnkiLAogICJkZXNjcmlwdGlvbiI6ICJBSS1wb3dlcmVkIGdyb2NlcnkgaW52ZW50b3J5IG1hbmFnZW1lbnQgd2l0aCByZWNlaXB0IHNjYW5uaW5nIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOWZhZmIiLAogICJ0aGVtZV9jb2xvciI6ICIjM2I4MmY2IiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQtcHJpbWFyeSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU5URXlJaUJvWldsbmFIUTlJalV4TWlJZ2RtbGxkMEp2ZUQwaU1DQXDJREF5TlRFeUlEVXhNaUlnWm1sc2JEMGlJek5pT0RKbU5pSStQSEpsWTNRZ2VEMGlOVFlpSUhrOUlqVTJJaUIzYVdSMGFEMGlORE13SWlCb1pXbG5hSFE5SWpRek1DSWdabWxzYkQwaWQyaHBkR1VpSUhKNFBTSXlNQ0kvUGp4MFpYaDBJSGc5SWpFMU5pSWdlVDBpTVRrd0lpQm1iMjUwTFdaaGJXbHNlVDBpUVhKcFlXd3NJRzF2Ym05emNHRmpZU0lnWm1sc2JEMGlJek14TVRneU55SWdkR1Y0ZEMxaGJtTm9iM0k5SW0xcFpHUnNaU0lnWm05dWRDMXphWHBsUFNKalpTSStQSFJ6Y0dGdVBqOHZQQzl6Y0dGdVBqd3ZkR1Y0ZEQ0OEwzTjJaejRzIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAibWFza2FibGUgYW55IgogICAgfQogIF0sCiAgInJlbGF0ZWRfYXBwbGljYXRpb25zIjogW10sCiAgInByZWZlcl9yZWxhdGVkX2FwcGxpY2F0aW9ucyI6IGZhbHNlCn0=">
-
+    <link rel="manifest" href="/site.webmanifest">
     
-
-    <!-- App Icons (Real favicon.io icons) -->
-
+    <!-- App Icons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
 
-
-
     <style>
-
         * {
-
             margin: 0;
-
             padding: 0;
-
             box-sizing: border-box;
-
         }
-
-
 
         body {
-
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
             background-color: #f9fafb;
-
             min-height: 100vh;
-
             user-select: none;
-
             -webkit-user-select: none;
-
             -webkit-touch-callout: none;
-
         }
-
-
 
         .container {
-
             max-width: 448px;
-
             margin: 0 auto;
-
             background: white;
-
             min-height: 100vh;
-
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
-
             position: relative;
-
         }
-
-
 
         /* Install Banner */
-
         .install-banner {
-
             position: fixed;
-
             top: 0;
-
             left: 0;
-
             right: 0;
-
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-
             color: white;
-
             padding: 12px 16px;
-
             text-align: center;
-
             z-index: 1000;
-
             font-size: 14px;
-
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-
             display: none;
-
         }
-
-
 
         .install-banner.show {
-
             display: block;
-
         }
-
-
 
         .install-btn {
-
             background: white;
-
             color: #3b82f6;
-
             border: none;
-
             padding: 6px 12px;
-
             border-radius: 4px;
-
             margin-left: 8px;
-
             cursor: pointer;
-
             font-weight: 500;
-
             font-size: 12px;
-
         }
-
-
 
         .dismiss-btn {
-
             background: transparent;
-
             color: white;
-
             border: 1px solid white;
-
             padding: 6px 12px;
-
             border-radius: 4px;
-
             margin-left: 4px;
-
             cursor: pointer;
-
             font-size: 12px;
-
         }
-
-
 
         /* Header */
-
         .header {
-
             background: white;
-
             border-bottom: 1px solid #e5e7eb;
-
             padding: 16px;
-
             text-align: center;
-
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-
             position: sticky;
-
             top: 0;
-
             z-index: 100;
-
         }
-
-
 
         .header h1 {
-
             font-size: 20px;
-
             font-weight: bold;
-
             color: #111827;
-
         }
-
-
 
         /* Main Content */
-
         .main-content {
-
             padding: 20px;
-
             padding-bottom: 100px;
-
         }
-
-
 
         /* Stats Grid */
-
         .stats-grid {
-
             display: grid;
-
             grid-template-columns: 1fr 1fr;
-
             gap: 16px;
-
             margin-bottom: 24px;
-
         }
-
-
 
         .stat-card {
-
             padding: 16px;
-
             border-radius: 8px;
-
             color: white;
-
             text-align: center;
-
             background: linear-gradient(135deg, var(--bg-from), var(--bg-to));
-
         }
-
-
 
         .stat-card.green {
-
             --bg-from: #22c55e;
-
             --bg-to: #16a34a;
-
         }
-
-
 
         .stat-card.orange {
-
             --bg-from: #f97316;
-
             --bg-to: #ea580c;
-
         }
-
-
 
         .stat-card h3 {
-
             font-size: 12px;
-
             opacity: 0.9;
-
             margin-bottom: 4px;
-
         }
-
-
 
         .stat-card .number {
-
             font-size: 24px;
-
             font-weight: bold;
-
         }
-
-
 
         /* Notifications */
-
         .notifications {
-
             background: white;
-
             border-radius: 8px;
-
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-
             padding: 16px;
-
             margin-bottom: 24px;
-
         }
-
-
 
         .notifications h3 {
-
             margin-bottom: 12px;
-
             font-size: 18px;
-
             font-weight: 600;
-
         }
-
-
 
         .notification {
-
             padding: 12px;
-
             border-radius: 8px;
-
             border-left: 4px solid;
-
             margin-bottom: 8px;
-
         }
-
-
 
         .notification.warning {
-
             background: #fefce8;
-
             border-color: #f59e0b;
-
         }
-
-
 
         .notification.alert {
-
             background: #fef2f2;
-
             border-color: #ef4444;
-
         }
 
-
+        .notification.success {
+            background: #f0fdf4;
+            border-color: #22c55e;
+        }
 
         .notification p {
-
             margin: 0;
-
             font-size: 14px;
-
         }
-
-
 
         .notification .time {
-
             font-size: 12px;
-
             color: #6b7280;
-
             margin-top: 4px;
-
         }
-
-
 
         /* Action Buttons */
-
         .action-grid {
-
             display: grid;
-
             grid-template-columns: 1fr 1fr;
-
             gap: 16px;
-
         }
-
-
 
         .action-btn {
-
             padding: 16px;
-
             border-radius: 8px;
-
             border: none;
-
             color: white;
-
             cursor: pointer;
-
             text-align: center;
-
             font-weight: 500;
-
             transition: transform 0.1s;
-
         }
-
-
 
         .action-btn:active {
-
             transform: scale(0.95);
-
         }
-
-
 
         .action-btn.blue {
-
             background: #3b82f6;
-
         }
-
-
 
         .action-btn.purple {
-
             background: #8b5cf6;
-
         }
-
-
 
         .action-btn .icon {
-
             font-size: 24px;
-
             margin-bottom: 8px;
-
             display: block;
-
         }
-
-
 
         /* Bottom Navigation */
-
         .bottom-nav {
-
             position: fixed;
-
             bottom: 0;
-
             left: 50%;
-
             transform: translateX(-50%);
-
             width: 100%;
-
             max-width: 448px;
-
             background: white;
-
             border-top: 1px solid #e5e7eb;
-
             padding: 8px 16px;
-
             box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
-
             z-index: 50;
-
         }
-
-
 
         .nav-items {
-
             display: flex;
-
             justify-content: space-around;
-
         }
-
-
 
         .nav-item {
-
             display: flex;
-
             flex-direction: column;
-
             align-items: center;
-
             padding: 8px 12px;
-
             border-radius: 8px;
-
             cursor: pointer;
-
             color: #6b7280;
-
             font-size: 12px;
-
             font-weight: 500;
-
             position: relative;
-
             transition: all 0.1s;
-
         }
-
-
 
         .nav-item:active {
-
             transform: scale(0.95);
-
         }
-
-
 
         .nav-item.active {
-
             background: #dbeafe;
-
             color: #2563eb;
-
         }
-
-
 
         .nav-item .icon {
-
             font-size: 20px;
-
             margin-bottom: 4px;
-
         }
-
-
 
         .nav-item .badge {
-
             position: absolute;
-
             top: -4px;
-
             right: -4px;
-
             background: #ef4444;
-
             color: white;
-
             font-size: 10px;
-
             border-radius: 50%;
-
             width: 16px;
-
             height: 16px;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
         }
-
-
 
         /* Tabs Content */
-
         .tab-content {
-
             display: none;
-
         }
-
-
 
         .tab-content.active {
-
             display: block;
-
         }
-
-
 
         /* Receipt Tab */
-
         .camera-zone {
-
             border: 2px dashed #d1d5db;
-
             border-radius: 8px;
-
             padding: 32px;
-
             text-align: center;
-
             background: #f9fafb;
-
             margin-bottom: 24px;
-
         }
-
-
 
         .camera-zone .icon {
-
             font-size: 48px;
-
             margin-bottom: 12px;
-
         }
-
-
 
         .camera-zone p {
-
             color: #6b7280;
-
             margin-bottom: 12px;
-
         }
-
-
 
         .camera-btn {
-
             background: #3b82f6;
-
             color: white;
-
             padding: 8px 24px;
-
             border-radius: 8px;
-
             border: none;
-
             cursor: pointer;
-
             font-weight: 500;
-
             transition: transform 0.1s;
-
         }
-
-
 
         .camera-btn:active {
-
             transform: scale(0.95);
-
         }
 
-
+        .camera-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
 
         /* Inventory */
-
         .inventory-item {
-
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
-
             padding: 16px;
-
             border-bottom: 1px solid #f3f4f6;
-
         }
-
-
 
         .inventory-item:last-child {
-
             border-bottom: none;
-
         }
-
-
 
         .item-info {
-
             display: flex;
-
             align-items: center;
-
         }
-
-
 
         .status-dot {
-
             width: 12px;
-
             height: 12px;
-
             border-radius: 50%;
-
             margin-right: 12px;
-
         }
-
-
 
         .status-dot.green { background: #22c55e; }
-
         .status-dot.yellow { background: #f59e0b; }
-
         .status-dot.red { background: #ef4444; }
 
-
-
         .item-details h4 {
-
             margin: 0 0 4px 0;
-
             font-weight: 500;
-
         }
-
-
 
         .item-details p {
-
             margin: 0;
-
             font-size: 14px;
-
             color: #6b7280;
-
         }
-
-
 
         .item-quantity {
-
             text-align: right;
-
         }
-
-
 
         .item-quantity .amount {
-
             font-weight: 600;
-
             margin-bottom: 4px;
-
         }
-
-
 
         .item-quantity .warning {
-
             font-size: 12px;
-
             color: #f59e0b;
-
         }
-
-
 
         /* Meal Input */
-
         .meal-input {
-
             margin-bottom: 16px;
-
         }
-
-
 
         .meal-input label {
-
             display: block;
-
             font-size: 14px;
-
             font-weight: 500;
-
             color: #374151;
-
             margin-bottom: 8px;
-
         }
-
-
 
         .meal-input textarea {
-
             width: 100%;
-
             padding: 12px;
-
             border: 1px solid #d1d5db;
-
             border-radius: 8px;
-
             font-size: 16px;
-
             resize: vertical;
-
             min-height: 80px;
-
         }
-
-
 
         .meal-btn {
-
             width: 100%;
-
             background: #8b5cf6;
-
             color: white;
-
             padding: 12px;
-
             border-radius: 8px;
-
             border: none;
-
             cursor: pointer;
-
             font-weight: 500;
-
             margin-top: 8px;
-
             transition: transform 0.1s;
-
         }
-
-
 
         .meal-btn:active {
-
             transform: scale(0.98);
-
         }
-
-
 
         .meal-btn:disabled {
-
             background: #d1d5db;
-
             cursor: not-allowed;
-
         }
-
-
 
         .section-card {
-
             background: white;
-
             border-radius: 8px;
-
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-
             margin-bottom: 16px;
-
         }
-
-
 
         .section-header {
-
             padding: 16px;
-
             border-bottom: 1px solid #e5e7eb;
-
             font-size: 18px;
-
             font-weight: 600;
-
         }
-
-
 
         .or-divider {
-
             text-align: center;
-
             color: #6b7280;
-
             font-weight: 500;
-
             margin: 16px 0;
-
         }
 
-
-
-        /* PWA Enhancements */
-
-        @media (display-mode: standalone) {
-
-            .header {
-
-                padding-top: env(safe-area-inset-top, 16px);
-
-            }
-
+        /* Hidden file inputs */
+        .hidden-input {
+            display: none;
         }
-
-
 
         /* Loading animation */
-
         .loading {
-
             display: inline-block;
-
             width: 20px;
-
             height: 20px;
-
             border: 3px solid #f3f3f3;
-
             border-top: 3px solid #3b82f6;
-
             border-radius: 50%;
-
             animation: spin 1s linear infinite;
-
         }
-
-
 
         @keyframes spin {
-
             0% { transform: rotate(0deg); }
-
             100% { transform: rotate(360deg); }
-
         }
 
+        /* Camera preview */
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+
+        /* AI API Key Setup */
+        .api-setup {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .api-setup h4 {
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+
+        .api-setup p {
+            color: #78350f;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .api-save-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* PWA Enhancements */
+        @media (display-mode: standalone) {
+            .header {
+                padding-top: env(safe-area-inset-top, 16px);
+            }
+        }
     </style>
-
 </head>
-
 <body>
-
     <!-- Install Banner -->
-
     <div id="install-banner" class="install-banner">
-
         <span>📱 Install StockHome for the best experience!</span>
-
         <button class="install-btn" onclick="installApp()">Install</button>
-
         <button class="dismiss-btn" onclick="dismissInstall()">Later</button>
-
     </div>
-
-
 
     <div class="container">
-
         <!-- Header -->
-
         <div class="header">
-
             <h1>🏠 StockHome</h1>
-
         </div>
-
-
 
         <!-- Main Content -->
-
         <div class="main-content">
-
             <!-- Home Tab -->
-
             <div id="home-tab" class="tab-content active">
+                <!-- API Setup Alert -->
+                <div id="api-setup" class="api-setup">
+                    <h4>🤖 Enable AI Features</h4>
+                    <p>Add your OpenAI API key for real receipt scanning and meal analysis:</p>
+                    <input type="password" id="api-key-input" class="api-input" placeholder="sk-your-openai-api-key-here">
+                    <button class="api-save-btn" onclick="saveApiKey()">Save API Key</button>
+                    <p style="font-size: 12px; margin-top: 8px;">Your key is stored locally and never sent to our servers.</p>
+                </div>
 
                 <!-- Stats -->
-
                 <div class="stats-grid">
-
                     <div class="stat-card green">
-
                         <h3>Total Items</h3>
-
-                        <div class="number">4</div>
-
+                        <div class="number" id="total-items">4</div>
                     </div>
-
                     <div class="stat-card orange">
-
                         <h3>Low Stock</h3>
-
-                        <div class="number">1</div>
-
+                        <div class="number" id="low-stock">1</div>
                     </div>
-
                 </div>
-
-
 
                 <!-- Notifications -->
-
                 <div class="notifications">
-
                     <h3>🔔 Recent Notifications</h3>
-
-                    <div class="notification warning">
-
-                        <p>Bananas running low (6 left)</p>
-
-                        <p class="time">Just now</p>
-
+                    <div id="notifications-list">
+                        <div class="notification warning">
+                            <p>Bananas running low (6 left)</p>
+                            <p class="time">Just now</p>
+                        </div>
+                        <div class="notification alert">
+                            <p>Milk expires in 2 days</p>
+                            <p class="time">5 minutes ago</p>
+                        </div>
                     </div>
-
-                    <div class="notification alert">
-
-                        <p>Milk expires in 2 days</p>
-
-                        <p class="time">5 minutes ago</p>
-
-                    </div>
-
                 </div>
-
-
 
                 <!-- Quick Actions -->
-
                 <div class="action-grid">
-
                     <button class="action-btn blue" onclick="showTab('receipt')">
-
                         <span class="icon">📷</span>
-
                         Scan Receipt
-
                     </button>
-
                     <button class="action-btn purple" onclick="showTab('meal')">
-
                         <span class="icon">🍽️</span>
-
                         Log Meal
-
                     </button>
-
                 </div>
-
             </div>
-
-
 
             <!-- Receipt Tab -->
-
             <div id="receipt-tab" class="tab-content">
-
                 <div class="section-card">
-
                     <div class="section-header">📷 Scan Grocery Receipt</div>
-
                     <div style="padding: 16px;">
-
                         <div class="camera-zone">
-
                             <div class="icon">📷</div>
-
                             <p>Take a photo of your grocery receipt</p>
-
-                            <button class="camera-btn" onclick="simulateReceipt()">
-
+                            <input type="file" id="receipt-input" class="hidden-input" accept="image/*" capture="environment">
+                            <button class="camera-btn" id="receipt-btn" onclick="openReceiptCamera()">
                                 <span id="receipt-btn-text">Open Camera</span>
-
                             </button>
-
+                            <div id="receipt-preview"></div>
                             <p style="font-size: 12px; color: #9ca3af; margin-top: 12px;">
-
                                 AI will automatically extract items and update inventory
-
                             </p>
-
                         </div>
-
                     </div>
-
                 </div>
 
+                <!-- Recent Receipts -->
+                <div class="section-card" id="recent-receipts" style="display: none;">
+                    <div class="section-header">📋 Recent Receipts</div>
+                    <div id="receipts-list"></div>
+                </div>
             </div>
-
-
 
             <!-- Meal Tab -->
-
             <div id="meal-tab" class="tab-content">
-
                 <div class="section-card">
-
                     <div class="section-header">🍽️ Log Your Meal</div>
-
                     <div style="padding: 16px;">
-
                         <div class="camera-zone">
-
                             <div class="icon">📷</div>
-
                             <p>Take a photo of your meal</p>
-
-                            <button class="camera-btn" onclick="simulateMeal()">Take Photo</button>
-
+                            <input type="file" id="meal-input" class="hidden-input" accept="image/*" capture="environment">
+                            <button class="camera-btn" onclick="openMealCamera()">Take Photo</button>
+                            <div id="meal-preview"></div>
                         </div>
-
                         
-
                         <div class="or-divider">OR</div>
-
                         
-
                         <div class="meal-input">
-
                             <label>Describe what you ate:</label>
-
                             <textarea id="meal-text" placeholder="e.g., Spaghetti with ground beef and cheese..."></textarea>
-
-                            <button class="meal-btn" onclick="logMeal()">Log Meal</button>
-
+                            <button class="meal-btn" onclick="logMealText()">Log Meal</button>
                         </div>
-
                     </div>
-
                 </div>
 
+                <!-- Recent Meals -->
+                <div class="section-card" id="recent-meals" style="display: none;">
+                    <div class="section-header">🍽️ Recent Meals</div>
+                    <div id="meals-list"></div>
+                </div>
             </div>
-
-
 
             <!-- Inventory Tab -->
-
             <div id="inventory-tab" class="tab-content">
-
                 <div class="section-card">
-
                     <div class="section-header">📦 Current Inventory</div>
-
-                    <div class="inventory-item">
-
-                        <div class="item-info">
-
-                            <div class="status-dot red"></div>
-
-                            <div class="item-details">
-
-                                <h4>Bananas</h4>
-
-                                <p>Produce</p>
-
+                    <div id="inventory-list">
+                        <div class="inventory-item">
+                            <div class="item-info">
+                                <div class="status-dot red"></div>
+                                <div class="item-details">
+                                    <h4>Bananas</h4>
+                                    <p>Produce</p>
+                                </div>
                             </div>
-
-                        </div>
-
-                        <div class="item-quantity">
-
-                            <div class="amount">6 pieces</div>
-
-                            <div class="warning">Low stock!</div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="inventory-item">
-
-                        <div class="item-info">
-
-                            <div class="status-dot yellow"></div>
-
-                            <div class="item-details">
-
-                                <h4>Milk</h4>
-
-                                <p>Dairy</p>
-
+                            <div class="item-quantity">
+                                <div class="amount">6 pieces</div>
+                                <div class="warning">Low stock!</div>
                             </div>
-
                         </div>
-
-                        <div class="item-quantity">
-
-                            <div class="amount">1 gallon</div>
-
-                            <div class="warning">Expires in 5 days</div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="inventory-item">
-
-                        <div class="item-info">
-
-                            <div class="status-dot green"></div>
-
-                            <div class="item-details">
-
-                                <h4>Bread</h4>
-
-                                <p>Bakery</p>
-
+                        <div class="inventory-item">
+                            <div class="item-info">
+                                <div class="status-dot yellow"></div>
+                                <div class="item-details">
+                                    <h4>Milk</h4>
+                                    <p>Dairy</p>
+                                </div>
                             </div>
-
-                        </div>
-
-                        <div class="item-quantity">
-
-                            <div class="amount">2 loaves</div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="inventory-item">
-
-                        <div class="item-info">
-
-                            <div class="status-dot green"></div>
-
-                            <div class="item-details">
-
-                                <h4>Toilet Paper</h4>
-
-                                <p>Household</p>
-
+                            <div class="item-quantity">
+                                <div class="amount">1 gallon</div>
+                                <div class="warning">Expires in 5 days</div>
                             </div>
-
                         </div>
-
-                        <div class="item-quantity">
-
-                            <div class="amount">8 rolls</div>
-
+                        <div class="inventory-item">
+                            <div class="item-info">
+                                <div class="status-dot green"></div>
+                                <div class="item-details">
+                                    <h4>Bread</h4>
+                                    <p>Bakery</p>
+                                </div>
+                            </div>
+                            <div class="item-quantity">
+                                <div class="amount">2 loaves</div>
+                            </div>
                         </div>
-
+                        <div class="inventory-item">
+                            <div class="item-info">
+                                <div class="status-dot green"></div>
+                                <div class="item-details">
+                                    <h4>Toilet Paper</h4>
+                                    <p>Household</p>
+                                </div>
+                            </div>
+                            <div class="item-quantity">
+                                <div class="amount">8 rolls</div>
+                            </div>
+                        </div>
                     </div>
-
                 </div>
-
             </div>
-
-
 
             <!-- Notifications Tab -->
-
             <div id="notifications-tab" class="tab-content">
-
                 <div class="section-card">
-
                     <div class="section-header">🔔 All Notifications</div>
-
-                    <div class="notification warning">
-
-                        <p>Bananas running low (6 left)</p>
-
-                        <p class="time">Just now</p>
-
+                    <div id="all-notifications">
+                        <div class="notification warning">
+                            <p>Bananas running low (6 left)</p>
+                            <p class="time">Just now</p>
+                        </div>
+                        <div class="notification alert">
+                            <p>Milk expires in 2 days</p>
+                            <p class="time">5 minutes ago</p>
+                        </div>
+                        <div style="padding: 16px; text-align: center; color: #6b7280;">
+                            <p>No more notifications</p>
+                        </div>
                     </div>
-
-                    <div class="notification alert">
-
-                        <p>Milk expires in 2 days</p>
-
-                        <p class="time">5 minutes ago</p>
-
-                    </div>
-
-                    <div style="padding: 16px; text-align: center; color: #6b7280;">
-
-                        <p>No more notifications</p>
-
-                    </div>
-
                 </div>
-
             </div>
-
         </div>
-
-
 
         <!-- Bottom Navigation -->
-
         <div class="bottom-nav">
-
             <div class="nav-items">
-
                 <div class="nav-item active" onclick="showTab('home')">
-
                     <span class="icon">🏠</span>
-
                     <span>Home</span>
-
                 </div>
-
                 <div class="nav-item" onclick="showTab('receipt')">
-
                     <span class="icon">📷</span>
-
                     <span>Receipt</span>
-
                 </div>
-
                 <div class="nav-item" onclick="showTab('meal')">
-
                     <span class="icon">🍽️</span>
-
                     <span>Meal</span>
-
                 </div>
-
                 <div class="nav-item" onclick="showTab('inventory')">
-
                     <span class="icon">📦</span>
-
                     <span>Inventory</span>
-
                 </div>
-
                 <div class="nav-item" onclick="showTab('notifications')">
-
                     <span class="icon">🔔</span>
-
                     <span>Alerts</span>
-
                     <span class="badge">2</span>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
-
-
     <script>
+        // App State
+        let apiKey = localStorage.getItem('openai-api-key') || '';
+        let inventory = [
+            { id: 1, name: 'Bananas', quantity: 6, unit: 'pieces', category: 'Produce', lowThreshold: 2 },
+            { id: 2, name: 'Milk', quantity: 1, unit: 'gallon', category: 'Dairy', lowThreshold: 1 },
+            { id: 3, name: 'Bread', quantity: 2, unit: 'loaves', category: 'Bakery', lowThreshold: 1 },
+            { id: 4, name: 'Toilet Paper', quantity: 8, unit: 'rolls', category: 'Household', lowThreshold: 4 }
+        ];
+        let receipts = [];
+        let meals = [];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            if (apiKey) {
+                document.getElementById('api-setup').style.display = 'none';
+            }
+            updateStats();
+        });
 
         // PWA Install functionality
-
         let deferredPrompt;
 
-        let isInstallable = false;
-
-
-
         // Show install banner after 3 seconds
-
         setTimeout(() => {
-
             if (!isStandalone() && !localStorage.getItem('install-dismissed')) {
-
                 document.getElementById('install-banner').classList.add('show');
-
             }
-
         }, 3000);
 
-
-
-        // Check if app is already installed
-
         function isStandalone() {
-
             return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
         }
-
-
-
-        // Handle install prompt
 
         window.addEventListener('beforeinstallprompt', (e) => {
-
             e.preventDefault();
-
             deferredPrompt = e;
-
-            isInstallable = true;
-
         });
-
-
 
         function installApp() {
-
             if (deferredPrompt) {
-
                 deferredPrompt.prompt();
-
                 deferredPrompt.userChoice.then((choiceResult) => {
-
                     if (choiceResult.outcome === 'accepted') {
-
-                        console.log('User accepted the install prompt');
-
                         showToast('StockHome installed successfully! 🎉');
-
                     }
-
                     deferredPrompt = null;
-
                     dismissInstall();
-
                 });
-
             } else if (isIOSSafari()) {
-
                 showIOSInstallInstructions();
-
             } else {
-
                 showToast('App installation not available on this browser');
-
             }
-
         }
-
-
 
         function dismissInstall() {
-
             document.getElementById('install-banner').classList.remove('show');
-
             localStorage.setItem('install-dismissed', 'true');
-
         }
-
-
 
         function isIOSSafari() {
-
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|mercury/.test(navigator.userAgent);
-
         }
-
-
 
         function showIOSInstallInstructions() {
-
             alert('📱 To install StockHome on iPhone:\n\n1. Tap the Share button (⬆️)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install the app\n\nStockHome will appear on your home screen!');
-
         }
 
-
-
-        function showToast(message) {
-
-            const toast = document.createElement('div');
-
-            toast.style.cssText = `
-
-                position: fixed;
-
-                top: 20px;
-
-                left: 50%;
-
-                transform: translateX(-50%);
-
-                background: #22c55e;
-
-                color: white;
-
-                padding: 12px 20px;
-
-                border-radius: 8px;
-
-                z-index: 10000;
-
-                font-size: 14px;
-
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-
-            `;
-
-            toast.textContent = message;
-
-            document.body.appendChild(toast);
-
-            
-
-            setTimeout(() => {
-
-                toast.remove();
-
-            }, 3000);
-
-        }
-
-
-
-        // Tab navigation
-
-        function showTab(tabName) {
-
-            // Hide all tabs
-
-            const tabs = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(tab => tab.classList.remove('active'));
-
-            
-
-            // Show selected tab
-
-            document.getElementById(tabName + '-tab').classList.add('active');
-
-            
-
-            // Update navigation
-
-            const navItems = document.querySelectorAll('.nav-item');
-
-            navItems.forEach(item => item.classList.remove('active'));
-
-            event.target.closest('.nav-item').classList.add('active');
-
-        }
-
-
-
-        function simulateReceipt() {
-
-            const btn = document.getElementById('receipt-btn-text');
-
-            const originalText = btn.textContent;
-
-            
-
-            btn.innerHTML = '<span class="loading"></span> Analyzing...';
-
-            
-
-            setTimeout(() => {
-
-                btn.textContent = originalText;
-
-                showToast('Receipt analyzed! 7 items added to inventory 📋');
-
-                
-
-                // Update stats
-
-                document.querySelector('.stat-card.green .number').textContent = '11';
-
-                
-
-                // Add new notification
-
-                const notifications = document.querySelector('.notifications');
-
-                const newNotification = document.createElement('div');
-
-                newNotification.className = 'notification';
-
-                newNotification.style.background = '#f0fdf4';
-
-                newNotification.style.borderColor = '#22c55e';
-
-                newNotification.innerHTML = `
-
-                    <p>Fresh Market receipt processed - 7 items added</p>
-
-                    <p class="time">Just now</p>
-
-                `;
-
-                notifications.insertBefore(newNotification, notifications.children[1]);
-
-            }, 2000);
-
-        }
-
-
-
-        function simulateMeal() {
-
-            showToast('Meal photo analyzed! Pasta ingredients deducted from inventory 🍝');
-
-        }
-
-
-
-        function logMeal() {
-
-            const mealText = document.getElementById('meal-text').value;
-
-            if (mealText.trim()) {
-
-                showToast(`Meal logged: "${mealText.slice(0, 20)}..." Inventory updated! 🍽️`);
-
-                document.getElementById('meal-text').value = '';
-
+        // Save API Key
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            if (key.startsWith('sk-')) {
+                apiKey = key;
+                localStorage.setItem('openai-api-key', key);
+                document.getElementById('api-setup').style.display = 'none';
+                showToast('✅ API key saved! AI features now enabled.');
             } else {
-
-                showToast('Please describe what you ate first! ⚠️');
-
+                showToast('❌ Please enter a valid OpenAI API key (starts with sk-)');
             }
-
         }
 
+        // Camera Functions
+        function openReceiptCamera() {
+            document.getElementById('receipt-input').click();
+        }
 
+        function openMealCamera() {
+            document.getElementById('meal-input').click();
+        }
 
-        // Handle app installation event
-
-        window.addEventListener('appinstalled', (evt) => {
-
-            showToast('StockHome installed successfully! 🎉');
-
-            dismissInstall();
-
+        // File Upload Handlers
+        document.getElementById('receipt-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                showImagePreview(file, 'receipt-preview');
+                analyzeReceipt(file);
+            }
         });
 
+        document.getElementById('meal-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                showImagePreview(file, 'meal-preview');
+                analyzeMeal(file);
+            }
+        });
 
-
-        // Service Worker Registration (disabled for CodePen - works when deployed)
-
-        if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.host.includes('codepen')) {
-
-            window.addEventListener('load', () => {
-
-                navigator.serviceWorker.register('/sw.js')
-
-                    .then((registration) => {
-
-                        console.log('SW registered: ', registration);
-
-                        showToast('App ready for offline use! 📱');
-
-                    })
-
-                    .catch((registrationError) => {
-
-                        console.log('SW registration failed: ', registrationError);
-
-                    });
-
-            });
-
+        function showImagePreview(file, containerId) {
+            const container = document.getElementById(containerId);
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.className = 'image-preview';
+            container.innerHTML = '';
+            container.appendChild(img);
         }
 
+        // AI Analysis Functions
+        async function analyzeReceipt(file) {
+            const btn = document.getElementById('receipt-btn-text');
+            const originalText = btn.textContent;
+            
+            btn.innerHTML = '<span class="loading"></span> Analyzing...';
+            
+            if (!apiKey) {
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    showMockReceiptResult();
+                }, 2000);
+                return;
+            }
+
+            try {
+                const base64 = await fileToBase64(file);
+                const result = await callOpenAIVision(base64, 'receipt');
+                
+                if (result.success) {
+                    processReceiptData(result.data);
+                    showToast('✅ Receipt analyzed! Items added to inventory.');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Receipt analysis error:', error);
+                showToast('❌ Error analyzing receipt. Using demo data.');
+                showMockReceiptResult();
+            }
+            
+            btn.textContent = originalText;
+        }
+
+        async function analyzeMeal(file) {
+            if (!apiKey) {
+                showToast('🍽️ Meal photo received! Add API key for real analysis.');
+                return;
+            }
+
+            try {
+                const base64 = await fileToBase64(file);
+                const result = await callOpenAIVision(base64, 'meal');
+                
+                if (result.success) {
+                    processMealData(result.data);
+                    showToast('✅ Meal analyzed! Inventory updated.');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Meal analysis error:', error);
+                showToast('❌ Error analyzing meal. Please try again.');
+            }
+        }
+
+        function logMealText() {
+            const text = document.getElementById('meal-text').value.trim();
+            if (!text) {
+                showToast('⚠️ Please describe what you ate first!');
+                return;
+            }
+
+            if (!apiKey) {
+                showToast('📝 Meal logged! Add API key for automatic inventory updates.');
+                document.getElementById('meal-text').value = '';
+                return;
+            }
+
+            analyzeMealText(text);
+        }
+
+        async function analyzeMealText(mealText) {
+            try {
+                const result = await callOpenAIText(mealText);
+                
+                if (result.success) {
+                    processMealData(result.data);
+                    showToast('✅ Meal logged! Inventory updated based on ingredients.');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Meal text analysis error:', error);
+                showToast('❌ Error analyzing meal description.');
+            }
+            
+            document.getElementById('meal-text').value = '';
+        }
+
+        // OpenAI API Calls
+        async function callOpenAIVision(base64Image, type) {
+            const prompt = type === 'receipt' ? 
+                `Analyze this grocery receipt and extract information in JSON format:
+                {
+                  "store": "store name",
+                  "date": "purchase date",
+                  "items": [
+                    {
+                      "name": "item name",
+                      "quantity": number,
+                      "unit": "pieces/lbs/gallons/etc",
+                      "price": number,
+                      "category": "Produce/Dairy/Meat/Pantry/Household/etc"
+                    }
+                  ],
+                  "total": total_amount
+                }
+                Focus on grocery items and categorize them properly.` :
+                
+                `Analyze this meal photo and identify ingredients in JSON format:
+                {
+                  "meal_name": "dish name",
+                  "ingredients": ["ingredient1", "ingredient2"],
+                  "estimated_portions": {
+                    "ingredient1": 0.5,
+                    "ingredient2": 1.0
+                  }
+                }
+                Focus on main ingredients that would be tracked in inventory.`;
+
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4-vision-preview',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: [
+                                    { type: 'text', text: prompt },
+                                    {
+                                        type: 'image_url',
+                                        image_url: { url: `data:image/jpeg;base64,${base64Image}` }
+                                    }
+                                ]
+                            }
+                        ],
+                        max_tokens: 1000
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`OpenAI API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                
+                return {
+                    success: true,
+                    data: JSON.parse(content)
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        async function callOpenAIText(mealDescription) {
+            const prompt = `Analyze this meal description and identify ingredients: "${mealDescription}"
+            
+            Return JSON format:
+            {
+              "meal_name": "inferred dish name",
+              "ingredients": ["ingredient1", "ingredient2"],
+              "estimated_portions": {
+                "ingredient1": 0.5,
+                "ingredient2": 1.0
+              }
+            }
+            Focus on main ingredients tracked in grocery inventory.`;
+
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4',
+                        messages: [{ role: 'user', content: prompt }],
+                        max_tokens: 300
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`OpenAI API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                
+                return {
+                    success: true,
+                    data: JSON.parse(content)
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        // Data Processing
+        function processReceiptData(receiptData) {
+            // Add to receipts list
+            receipts.unshift({
+                id: Date.now(),
+                ...receiptData,
+                timestamp: new Date()
+            });
+
+            // Update inventory
+            receiptData.items.forEach(item => {
+                const existing = inventory.find(inv => 
+                    inv.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0])
+                );
+
+                if (existing) {
+                    existing.quantity += item.quantity;
+                } else {
+                    inventory.push({
+                        id: Date.now() + Math.random(),
+                        name: item.name,
+                        quantity: item.quantity,
+                        unit: item.unit,
+                        category: item.category,
+                        lowThreshold: Math.max(1, Math.floor(item.quantity * 0.2))
+                    });
+                }
+            });
+
+            updateUI();
+            addNotification(`Receipt processed! Added ${receiptData.items.length} items to inventory`, 'success');
+        }
+
+        function processMealData(mealData) {
+            // Add to meals list
+            meals.unshift({
+                id: Date.now(),
+                ...mealData,
+                timestamp: new Date()
+            });
+
+            // Update inventory by reducing quantities
+            mealData.ingredients.forEach(ingredient => {
+                const item = inventory.find(inv => 
+                    inv.name.toLowerCase().includes(ingredient.toLowerCase()) ||
+                    ingredient.toLowerCase().includes(inv.name.toLowerCase().split(' ')[0])
+                );
+
+                if (item) {
+                    const portion = mealData.estimated_portions[ingredient] || 0.5;
+                    item.quantity = Math.max(0, item.quantity - portion);
+                }
+            });
+
+            updateUI();
+            checkLowStock();
+        }
+
+        function showMockReceiptResult() {
+            const mockData = {
+                store: 'Fresh Market',
+                date: new Date().toLocaleDateString(),
+                items: [
+                    { name: 'Bananas', quantity: 8, unit: 'pieces', price: 3.20, category: 'Produce' },
+                    { name: 'Whole Milk', quantity: 1, unit: 'gallon', price: 4.99, category: 'Dairy' },
+                    { name: 'Ground Beef', quantity: 2, unit: 'lbs', price: 12.80, category: 'Meat' }
+                ],
+                total: 20.99
+            };
+            processReceiptData(mockData);
+        }
+
+        // UI Updates
+        function updateUI() {
+            updateStats();
+            updateInventoryDisplay();
+        }
+
+        function updateStats() {
+            document.getElementById('total-items').textContent = inventory.length;
+            const lowStock = inventory.filter(item => item.quantity <= item.lowThreshold).length;
+            document.getElementById('low-stock').textContent = lowStock;
+        }
+
+        function updateInventoryDisplay() {
+            const container = document.getElementById('inventory-list');
+            container.innerHTML = '';
+
+            inventory.forEach(item => {
+                const status = item.quantity <= item.lowThreshold ? 'red' : 
+                              item.quantity <= item.lowThreshold * 2 ? 'yellow' : 'green';
+                
+                const div = document.createElement('div');
+                div.className = 'inventory-item';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <div class="status-dot ${status}"></div>
+                        <div class="item-details">
+                            <h4>${item.name}</h4>
+                            <p>${item.category}</p>
+                        </div>
+                    </div>
+                    <div class="item-quantity">
+                        <div class="amount">${item.quantity} ${item.unit}</div>
+                        ${item.quantity <= item.lowThreshold ? '<div class="warning">Low stock!</div>' : ''}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function checkLowStock() {
+            const lowStockItems = inventory.filter(item => 
+                item.quantity <= item.lowThreshold && item.quantity > 0
+            );
+            
+            lowStockItems.forEach(item => {
+                addNotification(`${item.name} is running low! Only ${item.quantity} ${item.unit} left`, 'warning');
+            });
+        }
+
+        function addNotification(message, type = 'warning') {
+            const notification = {
+                id: Date.now(),
+                message: message,
+                type: type,
+                timestamp: new Date()
+            };
+
+            // Add to home notifications
+            const homeNotifications = document.getElementById('notifications-list');
+            const div = document.createElement('div');
+            div.className = `notification ${type}`;
+            div.innerHTML = `
+                <p>${message}</p>
+                <p class="time">${notification.timestamp.toLocaleTimeString()}</p>
+            `;
+            homeNotifications.insertBefore(div, homeNotifications.firstChild);
+
+            // Add to all notifications
+            const allNotifications = document.getElementById('all-notifications');
+            const allDiv = div.cloneNode(true);
+            allNotifications.insertBefore(allDiv, allNotifications.firstChild);
+        }
+
+        // Tab navigation
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Update navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        // Utility functions
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #22c55e;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-size: 14px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                max-width: 90%;
+                text-align: center;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Handle app installation event
+        window.addEventListener('appinstalled', (evt) => {
+            showToast('StockHome installed successfully! 🎉');
+            dismissInstall();
+        });
+
+        // Service Worker Registration (disabled for CodePen - works when deployed)
+        if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.host.includes('codepen')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                        showToast('App ready for offline use! 📱');
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
     </script>
-
 </body>
-
 </html>
