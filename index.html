@@ -572,11 +572,11 @@
 
                 <!-- Stats -->
                 <div class="stats-grid">
-                    <div class="stat-card green">
+                    <div class="stat-card green" onclick="showTab('inventory')" style="cursor: pointer;">
                         <h3>Total Items</h3>
                         <div class="number" id="total-items">4</div>
                     </div>
-                    <div class="stat-card orange">
+                    <div class="stat-card orange" onclick="showTab('inventory')" style="cursor: pointer;">
                         <h3>Low Stock</h3>
                         <div class="number" id="low-stock">1</div>
                     </div>
@@ -769,7 +769,7 @@
                 <div class="nav-item" onclick="showTab('notifications')">
                     <span class="icon">🔔</span>
                     <span>Alerts</span>
-                    <span class="badge">2</span>
+                    <span class="badge" id="notification-badge" style="display: none;">0</span>
                 </div>
             </div>
         </div>
@@ -786,6 +786,10 @@
         ];
         let receipts = [];
         let meals = [];
+        let notifications = [
+            { id: 1, message: 'Bananas running low (6 left)', type: 'warning', timestamp: new Date() },
+            { id: 2, message: 'Milk expires in 2 days', type: 'alert', timestamp: new Date() }
+        ];
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -793,6 +797,7 @@
                 document.getElementById('api-setup').style.display = 'none';
             }
             updateStats();
+            updateNotificationBadge();
         });
 
         // PWA Install functionality
@@ -903,6 +908,7 @@
                 setTimeout(() => {
                     btn.textContent = originalText;
                     showMockReceiptResult();
+                    showToast('📄 Demo receipt processed! Add API key for real analysis.');
                 }, 2000);
                 return;
             }
@@ -915,11 +921,13 @@
                     processReceiptData(result.data);
                     showToast('✅ Receipt analyzed! Items added to inventory.');
                 } else {
-                    throw new Error(result.error);
+                    console.error('AI Analysis Error:', result.error);
+                    showToast('❌ AI analysis failed. Using demo data instead.');
+                    showMockReceiptResult();
                 }
             } catch (error) {
                 console.error('Receipt analysis error:', error);
-                showToast('❌ Error analyzing receipt. Using demo data.');
+                showToast('❌ Error processing receipt. Using demo data.');
                 showMockReceiptResult();
             }
             
@@ -985,24 +993,25 @@
         // OpenAI API Calls
         async function callOpenAIVision(base64Image, type) {
             const prompt = type === 'receipt' ? 
-                `Analyze this grocery receipt and extract information in JSON format:
+                `Analyze this grocery receipt and extract information. Return ONLY valid JSON in this exact format:
                 {
                   "store": "store name",
                   "date": "purchase date",
                   "items": [
                     {
                       "name": "item name",
-                      "quantity": number,
-                      "unit": "pieces/lbs/gallons/etc",
-                      "price": number,
-                      "category": "Produce/Dairy/Meat/Pantry/Household/etc"
+                      "quantity": 1,
+                      "unit": "pieces",
+                      "price": 1.99,
+                      "category": "Produce"
                     }
                   ],
-                  "total": total_amount
+                  "total": 5.99
                 }
-                Focus on grocery items and categorize them properly.` :
+                Categories must be: Produce, Dairy, Meat, Pantry, Household, Bakery, or Frozen.
+                Quantities must be numbers. Do not include any text outside the JSON.` :
                 
-                `Analyze this meal photo and identify ingredients in JSON format:
+                `Analyze this meal photo and identify ingredients. Return ONLY valid JSON in this exact format:
                 {
                   "meal_name": "dish name",
                   "ingredients": ["ingredient1", "ingredient2"],
@@ -1011,7 +1020,7 @@
                     "ingredient2": 1.0
                   }
                 }
-                Focus on main ingredients that would be tracked in inventory.`;
+                Do not include any text outside the JSON.`;
 
             try {
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -1034,22 +1043,35 @@
                                 ]
                             }
                         ],
-                        max_tokens: 1000
+                        max_tokens: 1000,
+                        temperature: 0.1
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`OpenAI API error: ${response.status}`);
+                    const errorData = await response.text();
+                    throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
                 }
 
                 const data = await response.json();
-                const content = data.choices[0].message.content;
+                let content = data.choices[0].message.content.trim();
+                
+                // Clean up the response to ensure it's valid JSON
+                if (content.startsWith('```json')) {
+                    content = content.replace(/```json\n?/, '').replace(/\n?```$/, '');
+                }
+                if (content.startsWith('```')) {
+                    content = content.replace(/```\n?/, '').replace(/\n?```$/, '');
+                }
+                
+                const parsedData = JSON.parse(content);
                 
                 return {
                     success: true,
-                    data: JSON.parse(content)
+                    data: parsedData
                 };
             } catch (error) {
+                console.error('OpenAI API Error Details:', error);
                 return {
                     success: false,
                     error: error.message
@@ -1167,11 +1189,13 @@
                 store: 'Fresh Market',
                 date: new Date().toLocaleDateString(),
                 items: [
-                    { name: 'Bananas', quantity: 8, unit: 'pieces', price: 3.20, category: 'Produce' },
+                    { name: 'Organic Bananas', quantity: 8, unit: 'pieces', price: 3.20, category: 'Produce' },
                     { name: 'Whole Milk', quantity: 1, unit: 'gallon', price: 4.99, category: 'Dairy' },
-                    { name: 'Ground Beef', quantity: 2, unit: 'lbs', price: 12.80, category: 'Meat' }
+                    { name: 'Ground Beef 85/15', quantity: 2, unit: 'lbs', price: 12.80, category: 'Meat' },
+                    { name: 'White Bread', quantity: 1, unit: 'loaf', price: 2.49, category: 'Bakery' },
+                    { name: 'Pasta Sauce', quantity: 2, unit: 'jars', price: 3.98, category: 'Pantry' }
                 ],
-                total: 20.99
+                total: 27.46
             };
             processReceiptData(mockData);
         }
@@ -1180,12 +1204,24 @@
         function updateUI() {
             updateStats();
             updateInventoryDisplay();
+            updateNotificationBadge();
         }
 
         function updateStats() {
             document.getElementById('total-items').textContent = inventory.length;
             const lowStock = inventory.filter(item => item.quantity <= item.lowThreshold).length;
             document.getElementById('low-stock').textContent = lowStock;
+        }
+
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notification-badge');
+            const count = notifications.length;
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
         }
 
         function updateInventoryDisplay() {
@@ -1233,6 +1269,9 @@
                 timestamp: new Date()
             };
 
+            // Add to notifications array
+            notifications.unshift(notification);
+
             // Add to home notifications
             const homeNotifications = document.getElementById('notifications-list');
             const div = document.createElement('div');
@@ -1247,6 +1286,9 @@
             const allNotifications = document.getElementById('all-notifications');
             const allDiv = div.cloneNode(true);
             allNotifications.insertBefore(allDiv, allNotifications.firstChild);
+
+            // Update notification badge
+            updateNotificationBadge();
         }
 
         // Tab navigation
@@ -1258,10 +1300,24 @@
             // Show selected tab
             document.getElementById(tabName + '-tab').classList.add('active');
             
-            // Update navigation
+            // Update navigation - handle both nav clicks and programmatic calls
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(item => item.classList.remove('active'));
-            event.target.closest('.nav-item').classList.add('active');
+            
+            // Find the correct nav item to highlight
+            const targetNavItem = Array.from(navItems).find(item => {
+                const tabText = item.textContent.toLowerCase();
+                return tabText.includes(tabName.toLowerCase()) || 
+                       (tabName === 'inventory' && tabText.includes('inventory')) ||
+                       (tabName === 'receipt' && tabText.includes('receipt')) ||
+                       (tabName === 'meal' && tabText.includes('meal')) ||
+                       (tabName === 'notifications' && tabText.includes('alerts')) ||
+                       (tabName === 'home' && tabText.includes('home'));
+            });
+            
+            if (targetNavItem) {
+                targetNavItem.classList.add('active');
+            }
         }
 
         // Utility functions
