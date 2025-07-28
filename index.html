@@ -129,12 +129,6 @@
             color: white;
             text-align: center;
             background: linear-gradient(135deg, var(--bg-from), var(--bg-to));
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .stat-card:active {
-            transform: scale(0.95);
         }
 
         .stat-card.green {
@@ -450,7 +444,6 @@
             border-bottom: 1px solid #e5e7eb;
             font-size: 18px;
             font-weight: 600;
-            position: relative;
         }
 
         .or-divider {
@@ -489,7 +482,7 @@
             margin: 12px 0;
         }
 
-        /* AI API Key Setup */
+        /* API Key Setup */
         .api-setup {
             background: #fef3c7;
             border: 1px solid #f59e0b;
@@ -527,17 +520,6 @@
             font-weight: 500;
         }
 
-        .clear-btn {
-            float: right;
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
         /* PWA Enhancements */
         @media (display-mode: standalone) {
             .header {
@@ -571,15 +553,19 @@
                     <input type="password" id="api-key-input" class="api-input" placeholder="sk-your-openai-api-key-here">
                     <button class="api-save-btn" onclick="saveApiKey()">Save API Key</button>
                     <p style="font-size: 12px; margin-top: 8px;">Your key is stored locally and never sent to our servers.</p>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #d1d5db;">
+                        <button onclick="exportData()" style="background: #6b7280; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 8px;">Backup Data</button>
+                        <button onclick="resetAllData()" style="background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Reset App</button>
+                    </div>
                 </div>
 
                 <!-- Stats -->
                 <div class="stats-grid">
-                    <div class="stat-card green" onclick="showTab('inventory')">
+                    <div class="stat-card green" onclick="showTab('inventory')" style="cursor: pointer;">
                         <h3>Total Items</h3>
                         <div class="number" id="total-items">4</div>
                     </div>
-                    <div class="stat-card orange" onclick="showTab('inventory')">
+                    <div class="stat-card orange" onclick="showTab('inventory')" style="cursor: pointer;">
                         <h3>Low Stock</h3>
                         <div class="number" id="low-stock">1</div>
                     </div>
@@ -632,6 +618,12 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Recent Receipts -->
+                <div class="section-card" id="recent-receipts" style="display: none;">
+                    <div class="section-header">📋 Recent Receipts</div>
+                    <div id="receipts-list"></div>
+                </div>
             </div>
 
             <!-- Meal Tab -->
@@ -655,6 +647,12 @@
                             <button class="meal-btn" onclick="logMealText()">Log Meal</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- Recent Meals -->
+                <div class="section-card" id="recent-meals" style="display: none;">
+                    <div class="section-header">🍽️ Recent Meals</div>
+                    <div id="meals-list"></div>
                 </div>
             </div>
 
@@ -722,7 +720,7 @@
                 <div class="section-card">
                     <div class="section-header">
                         🔔 All Notifications
-                        <button onclick="clearAllNotifications()" class="clear-btn">Clear All</button>
+                        <button onclick="clearAllNotifications()" style="float: right; background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Clear All</button>
                     </div>
                     <div id="all-notifications">
                         <div class="notification warning">
@@ -732,6 +730,9 @@
                         <div class="notification alert">
                             <p>Milk expires in 2 days</p>
                             <p class="time">5 minutes ago</p>
+                        </div>
+                        <div style="padding: 16px; text-align: center; color: #6b7280;">
+                            <p>No more notifications</p>
                         </div>
                     </div>
                 </div>
@@ -766,32 +767,85 @@
     </div>
 
     <script>
-        // App State
+        // App State with localStorage persistence
         let apiKey = localStorage.getItem('openai-api-key') || '';
-        let inventory = [
+        let inventory = JSON.parse(localStorage.getItem('stockhome-inventory')) || [
             { id: 1, name: 'Bananas', quantity: 6, unit: 'pieces', category: 'Produce', lowThreshold: 2 },
             { id: 2, name: 'Milk', quantity: 1, unit: 'gallon', category: 'Dairy', lowThreshold: 1 },
             { id: 3, name: 'Bread', quantity: 2, unit: 'loaves', category: 'Bakery', lowThreshold: 1 },
             { id: 4, name: 'Toilet Paper', quantity: 8, unit: 'rolls', category: 'Household', lowThreshold: 4 }
         ];
-        let receipts = [];
-        let meals = [];
-        let notifications = [
-            { id: 1, message: 'Bananas running low (6 left)', type: 'warning', timestamp: new Date() },
-            { id: 2, message: 'Milk expires in 2 days', type: 'alert', timestamp: new Date() }
+        let receipts = JSON.parse(localStorage.getItem('stockhome-receipts')) || [];
+        let meals = JSON.parse(localStorage.getItem('stockhome-meals')) || [];
+        let notifications = JSON.parse(localStorage.getItem('stockhome-notifications')) || [
+            { id: 1, message: 'Bananas running low (6 left)', type: 'warning', timestamp: new Date().toISOString() },
+            { id: 2, message: 'Milk expires in 2 days', type: 'alert', timestamp: new Date().toISOString() }
         ];
+
+        // Save data to localStorage
+        function saveToStorage() {
+            localStorage.setItem('stockhome-inventory', JSON.stringify(inventory));
+            localStorage.setItem('stockhome-receipts', JSON.stringify(receipts));
+            localStorage.setItem('stockhome-meals', JSON.stringify(meals));
+            localStorage.setItem('stockhome-notifications', JSON.stringify(notifications));
+        }
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             if (apiKey) {
                 document.getElementById('api-setup').style.display = 'none';
             }
+            
+            // Convert timestamp strings back to Date objects for display
+            notifications = notifications.map(notif => ({
+                ...notif,
+                timestamp: new Date(notif.timestamp)
+            }));
+            
             updateStats();
+            updateNotificationsDisplay();
         });
+
+        // Update notifications display on load
+        function updateNotificationsDisplay() {
+            // Update home notifications
+            const homeNotifications = document.getElementById('notifications-list');
+            homeNotifications.innerHTML = '';
+            
+            // Update all notifications
+            const allNotifications = document.getElementById('all-notifications');
+            allNotifications.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                homeNotifications.innerHTML = '<div style="padding: 16px; text-align: center; color: #6b7280;"><p>No notifications</p></div>';
+                allNotifications.innerHTML = '<div style="padding: 16px; text-align: center; color: #6b7280;"><p>No notifications</p></div>';
+            } else {
+                notifications.slice(0, 3).forEach(notification => {
+                    const div = document.createElement('div');
+                    div.className = `notification ${notification.type}`;
+                    div.innerHTML = `
+                        <p>${notification.message}</p>
+                        <p class="time">${notification.timestamp.toLocaleTimeString()}</p>
+                    `;
+                    homeNotifications.appendChild(div);
+                });
+                
+                notifications.forEach(notification => {
+                    const div = document.createElement('div');
+                    div.className = `notification ${notification.type}`;
+                    div.innerHTML = `
+                        <p>${notification.message}</p>
+                        <p class="time">${notification.timestamp.toLocaleTimeString()}</p>
+                    `;
+                    allNotifications.appendChild(div);
+                });
+            }
+        }
 
         // PWA Install functionality
         let deferredPrompt;
 
+        // Show install banner after 3 seconds
         setTimeout(() => {
             if (!isStandalone() && !localStorage.getItem('install-dismissed')) {
                 document.getElementById('install-banner').classList.add('show');
@@ -987,7 +1041,7 @@
         // OpenAI API Calls
         async function callOpenAIVision(base64Image, type) {
             const prompt = type === 'receipt' ? 
-                `Look at this grocery receipt image and extract the items. Return ONLY a valid JSON object with no additional text:
+                `Look at this grocery receipt image and extract the items. For packaged items, use typical package contents rather than just "1". Return ONLY a valid JSON object:
 
 {
   "store": "store name or Unknown",
@@ -995,17 +1049,38 @@
   "items": [
     {
       "name": "item name",
-      "quantity": 1,
-      "unit": "pieces",
-      "price": 0.99,
-      "category": "Produce"
+      "quantity": 8,
+      "unit": "slices",
+      "price": 2.99,
+      "category": "Bakery"
     }
   ],
-  "total": 0.99
+  "total": 2.99
 }
 
+IMPORTANT - Use these typical package contents for common items:
+- Bread/Sandwich Bread: 20-24 slices per loaf
+- Hot Dog/Hamburger Buns: 8 buns per package
+- Bagels: 6 bagels per package
+- English Muffins: 6 muffins per package
+- Yogurt Cups: 4-6 cups per pack
+- Eggs: 12 eggs per dozen
+- Chicken Breasts: 2-4 pieces per package
+- Ground Meat: Use actual weight in lbs
+- Cheese Slices: 12-16 slices per package
+- Tortillas: 8-10 tortillas per package
+- Cereal: 1 box (but specify as "box")
+- Pasta: 1 box/bag (but specify as "box")
+- Soup Cans: Count individual cans
+- Soda/Water: Count individual bottles/cans
+- Toilet Paper: Count individual rolls (usually 4-24 per pack)
+- Paper Towels: Count individual rolls
+- Bananas: Count individual bananas
+- Apples: Count individual apples or use lbs
+- Milk: 1 gallon/quart/pint as shown
+
 Valid categories: Produce, Dairy, Meat, Pantry, Household, Bakery, Frozen
-Make sure quantities are numbers and prices are decimals.` :
+Make sure quantities reflect actual usable units (slices, pieces, individual items).` :
                 
                 `Look at this meal image and identify the main ingredients. Return ONLY a valid JSON object:
 
@@ -1172,13 +1247,14 @@ Focus on main grocery ingredients only.`;
             receipts.unshift({
                 id: Date.now(),
                 ...receiptData,
-                timestamp: new Date()
+                timestamp: new Date().toISOString()
             });
 
             // Update inventory
             receiptData.items.forEach(item => {
                 const existing = inventory.find(inv => 
-                    inv.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0])
+                    inv.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0]) ||
+                    item.name.toLowerCase().includes(inv.name.toLowerCase().split(' ')[0])
                 );
 
                 if (existing) {
@@ -1195,6 +1271,8 @@ Focus on main grocery ingredients only.`;
                 }
             });
 
+            // Save to localStorage
+            saveToStorage();
             updateUI();
             addNotification(`Receipt processed! Added ${receiptData.items.length} items to inventory`, 'success');
         }
@@ -1204,7 +1282,7 @@ Focus on main grocery ingredients only.`;
             meals.unshift({
                 id: Date.now(),
                 ...mealData,
-                timestamp: new Date()
+                timestamp: new Date().toISOString()
             });
 
             // Update inventory by reducing quantities
@@ -1220,6 +1298,8 @@ Focus on main grocery ingredients only.`;
                 }
             });
 
+            // Save to localStorage
+            saveToStorage();
             updateUI();
             checkLowStock();
         }
@@ -1232,10 +1312,12 @@ Focus on main grocery ingredients only.`;
                     { name: 'Organic Bananas', quantity: 8, unit: 'pieces', price: 3.20, category: 'Produce' },
                     { name: 'Whole Milk', quantity: 1, unit: 'gallon', price: 4.99, category: 'Dairy' },
                     { name: 'Ground Beef 85/15', quantity: 2, unit: 'lbs', price: 12.80, category: 'Meat' },
-                    { name: 'White Bread', quantity: 1, unit: 'loaf', price: 2.49, category: 'Bakery' },
-                    { name: 'Pasta Sauce', quantity: 2, unit: 'jars', price: 3.98, category: 'Pantry' }
+                    { name: 'Sandwich Bread', quantity: 22, unit: 'slices', price: 2.49, category: 'Bakery' },
+                    { name: 'Pasta Sauce', quantity: 2, unit: 'jars', price: 3.98, category: 'Pantry' },
+                    { name: 'Greek Yogurt', quantity: 6, unit: 'cups', price: 5.99, category: 'Dairy' },
+                    { name: 'Toilet Paper', quantity: 12, unit: 'rolls', price: 8.99, category: 'Household' }
                 ],
-                total: 27.46
+                total: 42.44
             };
             processReceiptData(mockData);
         }
@@ -1277,6 +1359,9 @@ Focus on main grocery ingredients only.`;
                 `;
                 container.appendChild(div);
             });
+            
+            // Save inventory changes to localStorage
+            saveToStorage();
         }
 
         function checkLowStock() {
@@ -1294,11 +1379,14 @@ Focus on main grocery ingredients only.`;
                 id: Date.now(),
                 message: message,
                 type: type,
-                timestamp: new Date()
+                timestamp: new Date().toISOString()
             };
 
             // Add to notifications array
             notifications.unshift(notification);
+
+            // Save to localStorage
+            saveToStorage();
 
             // Add to home notifications
             const homeNotifications = document.getElementById('notifications-list');
@@ -1306,7 +1394,7 @@ Focus on main grocery ingredients only.`;
             div.className = `notification ${type}`;
             div.innerHTML = `
                 <p>${message}</p>
-                <p class="time">${notification.timestamp.toLocaleTimeString()}</p>
+                <p class="time">${new Date(notification.timestamp).toLocaleTimeString()}</p>
             `;
             homeNotifications.insertBefore(div, homeNotifications.firstChild);
 
@@ -1319,6 +1407,9 @@ Focus on main grocery ingredients only.`;
         function clearAllNotifications() {
             // Clear notifications array
             notifications.length = 0;
+            
+            // Save to localStorage
+            saveToStorage();
             
             // Clear home notifications
             const homeNotifications = document.getElementById('notifications-list');
@@ -1396,6 +1487,42 @@ Focus on main grocery ingredients only.`;
             setTimeout(() => {
                 toast.remove();
             }, 3000);
+        }
+
+        // Data backup and reset functions
+        function exportData() {
+            const data = {
+                inventory: inventory,
+                receipts: receipts,
+                meals: meals,
+                notifications: notifications,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `stockhome-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            showToast('📄 Data exported successfully!');
+        }
+
+        function resetAllData() {
+            if (confirm('Are you sure you want to reset all app data? This will delete your inventory, receipts, meals, and notifications. This cannot be undone.')) {
+                localStorage.removeItem('stockhome-inventory');
+                localStorage.removeItem('stockhome-receipts');
+                localStorage.removeItem('stockhome-meals');
+                localStorage.removeItem('stockhome-notifications');
+                
+                showToast('🔄 App data reset! Refreshing page...');
+                
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
         }
 
         // Handle app installation event
