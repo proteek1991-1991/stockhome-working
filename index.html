@@ -546,13 +546,10 @@
         <div class="main-content">
             <!-- Home Tab -->
             <div id="home-tab" class="tab-content active">
-                <!-- API Setup Alert -->
-                <div id="api-setup" class="api-setup">
-                    <h4>🤖 Enable AI Features</h4>
-                    <p>Add your OpenAI API key for real receipt scanning and meal analysis:</p>
-                    <input type="password" id="api-key-input" class="api-input" placeholder="sk-your-openai-api-key-here">
-                    <button class="api-save-btn" onclick="saveApiKey()">Save API Key</button>
-                    <p style="font-size: 12px; margin-top: 8px;">Your key is stored locally and never sent to our servers.</p>
+                <!-- No API Setup Needed - Secure Backend -->
+                <div id="api-setup" class="api-setup" style="display: none;">
+                    <h4>🤖 AI Features Ready</h4>
+                    <p>Your app is configured with secure AI analysis!</p>
                     <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #d1d5db;">
                         <button onclick="exportData()" style="background: #6b7280; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 8px;">Backup Data</button>
                         <button onclick="resetAllData()" style="background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Reset App</button>
@@ -767,34 +764,110 @@
     </div>
 
     <script>
+        // ===== SECURE VERSION - NO API KEY NEEDED =====
+        // The API key is safely stored on the server
+        // Users don't need to enter any keys
+        // =============================================
+        
         // App State with localStorage persistence
-        let apiKey = localStorage.getItem('openai-api-key') || '';
-        let inventory = JSON.parse(localStorage.getItem('stockhome-inventory')) || [
-            { id: 1, name: 'Bananas', quantity: 6, unit: 'pieces', category: 'Produce', lowThreshold: 2 },
-            { id: 2, name: 'Milk', quantity: 1, unit: 'gallon', category: 'Dairy', lowThreshold: 1 },
-            { id: 3, name: 'Bread', quantity: 2, unit: 'loaves', category: 'Bakery', lowThreshold: 1 },
-            { id: 4, name: 'Toilet Paper', quantity: 8, unit: 'rolls', category: 'Household', lowThreshold: 4 }
-        ];
-        let receipts = JSON.parse(localStorage.getItem('stockhome-receipts')) || [];
-        let meals = JSON.parse(localStorage.getItem('stockhome-meals')) || [];
-        let notifications = JSON.parse(localStorage.getItem('stockhome-notifications')) || [
-            { id: 1, message: 'Bananas running low (6 left)', type: 'warning', timestamp: new Date().toISOString() },
-            { id: 2, message: 'Milk expires in 2 days', type: 'alert', timestamp: new Date().toISOString() }
-        ];
+        
+        // Load data from localStorage or use defaults
+        let inventory = [];
+        let receipts = [];
+        let meals = [];
+        let notifications = [];
+
+        // Initialize data
+        function initializeData() {
+            // Load from localStorage or set defaults
+            const savedInventory = localStorage.getItem('stockhome-inventory');
+            const savedReceipts = localStorage.getItem('stockhome-receipts');
+            const savedMeals = localStorage.getItem('stockhome-meals');
+            const savedNotifications = localStorage.getItem('stockhome-notifications');
+            
+            if (savedInventory) {
+                inventory = JSON.parse(savedInventory);
+                console.log('Loaded inventory from storage:', inventory.length, 'items');
+            } else {
+                // Default inventory if none saved
+                inventory = [
+                    { id: 1, name: 'Bananas', quantity: 6, unit: 'pieces', category: 'Produce', lowThreshold: 2 },
+                    { id: 2, name: 'Milk', quantity: 1, unit: 'gallon', category: 'Dairy', lowThreshold: 1 },
+                    { id: 3, name: 'Bread', quantity: 2, unit: 'loaves', category: 'Bakery', lowThreshold: 1 },
+                    { id: 4, name: 'Toilet Paper', quantity: 8, unit: 'rolls', category: 'Household', lowThreshold: 4 }
+                ];
+                console.log('Using default inventory');
+            }
+            
+            receipts = savedReceipts ? JSON.parse(savedReceipts) : [];
+            meals = savedMeals ? JSON.parse(savedMeals) : [];
+            notifications = savedNotifications ? JSON.parse(savedNotifications) : [
+                { id: 1, message: 'Welcome to StockHome!', type: 'success', timestamp: new Date().toISOString() },
+                { id: 2, message: 'Start by scanning a receipt or logging a meal', type: 'warning', timestamp: new Date().toISOString() }
+            ];
+            
+            console.log('Data initialized - Inventory:', inventory.length, 'Receipts:', receipts.length, 'Meals:', meals.length, 'Notifications:', notifications.length);
+        }
 
         // Save data to localStorage
         function saveToStorage() {
-            localStorage.setItem('stockhome-inventory', JSON.stringify(inventory));
-            localStorage.setItem('stockhome-receipts', JSON.stringify(receipts));
-            localStorage.setItem('stockhome-meals', JSON.stringify(meals));
-            localStorage.setItem('stockhome-notifications', JSON.stringify(notifications));
+            try {
+                localStorage.setItem('stockhome-inventory', JSON.stringify(inventory));
+                localStorage.setItem('stockhome-receipts', JSON.stringify(receipts));
+                localStorage.setItem('stockhome-meals', JSON.stringify(meals));
+                localStorage.setItem('stockhome-notifications', JSON.stringify(notifications));
+                console.log('Data saved to localStorage successfully');
+                
+                // Verify the save worked
+                const testLoad = localStorage.getItem('stockhome-inventory');
+                if (testLoad) {
+                    const parsed = JSON.parse(testLoad);
+                    console.log('Verification: Saved', inventory.length, 'items, loaded', parsed.length, 'items');
+                }
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+                showToast('⚠️ Error saving data. Storage might be full.');
+            }
+        }
+
+        // Test localStorage functionality
+        function testLocalStorage() {
+            try {
+                const testKey = 'stockhome-test';
+                const testData = { test: 'data', timestamp: Date.now() };
+                localStorage.setItem(testKey, JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem(testKey));
+                localStorage.removeItem(testKey);
+                
+                if (retrieved && retrieved.test === 'data') {
+                    console.log('✅ localStorage is working correctly');
+                    return true;
+                } else {
+                    console.error('❌ localStorage test failed - data mismatch');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ localStorage test failed:', error);
+                return false;
+            }
         }
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            if (apiKey) {
-                document.getElementById('api-setup').style.display = 'none';
+            console.log('=== StockHome App Starting (Secure Version) ===');
+            
+            // Test localStorage functionality
+            const storageWorks = testLocalStorage();
+            if (!storageWorks) {
+                showToast('⚠️ Warning: Data may not persist between sessions');
             }
+            
+            // Initialize data from localStorage
+            initializeData();
+            
+            // Hide API setup since we use secure backend
+            document.getElementById('api-setup').style.display = 'none';
+            console.log('✅ Using secure backend for AI features');
             
             // Convert timestamp strings back to Date objects for display
             notifications = notifications.map(notif => ({
@@ -802,8 +875,22 @@
                 timestamp: new Date(notif.timestamp)
             }));
             
+            // Update UI
             updateStats();
+            updateInventoryDisplay();
             updateNotificationsDisplay();
+            
+            // Save initial state to ensure persistence works
+            saveToStorage();
+            
+            console.log('=== App initialized successfully ===');
+            console.log('Current inventory items:', inventory.length);
+            console.log('Current receipts:', receipts.length);
+            console.log('Current meals:', meals.length);
+            console.log('Current notifications:', notifications.length);
+            
+            // Show welcome message
+            showToast('🏠 StockHome ready! AI features enabled.');
         });
 
         // Update notifications display on load
@@ -891,19 +978,6 @@
             alert('📱 To install StockHome on iPhone:\n\n1. Tap the Share button (⬆️)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install the app\n\nStockHome will appear on your home screen!');
         }
 
-        // Save API Key
-        function saveApiKey() {
-            const key = document.getElementById('api-key-input').value.trim();
-            if (key.startsWith('sk-')) {
-                apiKey = key;
-                localStorage.setItem('openai-api-key', key);
-                document.getElementById('api-setup').style.display = 'none';
-                showToast('✅ API key saved! AI features now enabled.');
-            } else {
-                showToast('❌ Please enter a valid OpenAI API key (starts with sk-)');
-            }
-        }
-
         // Camera Functions
         function openReceiptCamera() {
             document.getElementById('receipt-input').click();
@@ -946,15 +1020,6 @@
             
             btn.innerHTML = '<span class="loading"></span> Analyzing...';
             
-            if (!apiKey) {
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    showMockReceiptResult();
-                    showToast('📄 Demo receipt processed! Add API key for real analysis.');
-                }, 2000);
-                return;
-            }
-
             try {
                 const base64 = await fileToBase64(file);
                 const result = await callOpenAIVision(base64, 'receipt');
@@ -977,11 +1042,6 @@
         }
 
         async function analyzeMeal(file) {
-            if (!apiKey) {
-                showToast('🍽️ Meal photo received! Add API key for real analysis.');
-                return;
-            }
-
             showToast('🔍 Analyzing meal photo...');
 
             try {
@@ -1005,12 +1065,6 @@
             const text = document.getElementById('meal-text').value.trim();
             if (!text) {
                 showToast('⚠️ Please describe what you ate first!');
-                return;
-            }
-
-            if (!apiKey) {
-                showToast('📝 Meal logged! Add API key for automatic inventory updates.');
-                document.getElementById('meal-text').value = '';
                 return;
             }
 
@@ -1038,211 +1092,80 @@
             document.getElementById('meal-text').value = '';
         }
 
-        // OpenAI API Calls
+        // Secure API Calls to Serverless Function
         async function callOpenAIVision(base64Image, type) {
-            const prompt = type === 'receipt' ? 
-                `Look at this grocery receipt image and extract the items. For packaged items, use typical package contents rather than just "1". Return ONLY a valid JSON object:
-
-{
-  "store": "store name or Unknown",
-  "date": "today's date",
-  "items": [
-    {
-      "name": "item name",
-      "quantity": 8,
-      "unit": "slices",
-      "price": 2.99,
-      "category": "Bakery"
-    }
-  ],
-  "total": 2.99
-}
-
-IMPORTANT - Use these typical package contents for common items:
-- Bread/Sandwich Bread: 20-24 slices per loaf
-- Hot Dog/Hamburger Buns: 8 buns per package
-- Bagels: 6 bagels per package
-- English Muffins: 6 muffins per package
-- Yogurt Cups: 4-6 cups per pack
-- Eggs: 12 eggs per dozen
-- Chicken Breasts: 2-4 pieces per package
-- Ground Meat: Use actual weight in lbs
-- Cheese Slices: 12-16 slices per package
-- Tortillas: 8-10 tortillas per package
-- Cereal: 1 box (but specify as "box")
-- Pasta: 1 box/bag (but specify as "box")
-- Soup Cans: Count individual cans
-- Soda/Water: Count individual bottles/cans
-- Toilet Paper: Count individual rolls (usually 4-24 per pack)
-- Paper Towels: Count individual rolls
-- Bananas: Count individual bananas
-- Apples: Count individual apples or use lbs
-- Milk: 1 gallon/quart/pint as shown
-
-Valid categories: Produce, Dairy, Meat, Pantry, Household, Bakery, Frozen
-Make sure quantities reflect actual usable units (slices, pieces, individual items).` :
-                
-                `Look at this meal image and identify the main ingredients. Return ONLY a valid JSON object:
-
-{
-  "meal_name": "dish name",
-  "ingredients": ["ingredient1", "ingredient2"],
-  "estimated_portions": {
-    "ingredient1": 0.5,
-    "ingredient2": 1.0
-  }
-}
-
-Focus on ingredients that would be in a grocery inventory.`;
-
             try {
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
                     },
                     body: JSON.stringify({
-                        model: 'gpt-4o-mini',
-                        messages: [
-                            {
-                                role: 'user',
-                                content: [
-                                    { type: 'text', text: prompt },
-                                    {
-                                        type: 'image_url',
-                                        image_url: { 
-                                            url: `data:image/jpeg;base64,${base64Image}`,
-                                            detail: 'low'
-                                        }
-                                    }
-                                ]
-                            }
-                        ],
-                        max_tokens: 500,
-                        temperature: 0.1
+                        image: base64Image,
+                        type: type
                     })
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('OpenAI API Response:', response.status, errorText);
-                    throw new Error(`API responded with ${response.status}: ${errorText}`);
+                    const errorData = await response.json();
+                    console.error('API Error:', response.status, errorData);
+                    throw new Error(`Server error: ${response.status} - ${errorData.error}`);
                 }
 
                 const data = await response.json();
                 
-                if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                    throw new Error('Invalid response format from OpenAI');
-                }
-                
-                let content = data.choices[0].message.content.trim();
-                
-                // Clean up the response
-                content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-                content = content.replace(/^[^{]*({.*})[^}]*$/s, '$1');
-                
-                console.log('Cleaned AI Response:', content);
-                
-                const parsedData = JSON.parse(content);
-                
-                // Validate the response structure
-                if (type === 'receipt') {
-                    if (!parsedData.items || !Array.isArray(parsedData.items)) {
-                        throw new Error('Invalid receipt format: missing items array');
-                    }
-                } else {
-                    if (!parsedData.ingredients || !Array.isArray(parsedData.ingredients)) {
-                        throw new Error('Invalid meal format: missing ingredients array');
-                    }
+                if (!data.success) {
+                    throw new Error(data.error || 'Unknown server error');
                 }
                 
                 return {
                     success: true,
-                    data: parsedData
+                    data: data.data
                 };
                 
             } catch (error) {
-                console.error('OpenAI Vision Error:', error);
+                console.error('Secure API Error:', error);
                 return {
                     success: false,
-                    error: `AI Analysis failed: ${error.message}`
+                    error: `Analysis failed: ${error.message}`
                 };
             }
         }
 
         async function callOpenAIText(mealDescription) {
-            const prompt = `Analyze this meal description: "${mealDescription}"
+            // For text analysis, we can use a simple approach or extend the API
+            // For now, let's use a simple ingredient extraction
+            const commonIngredients = [
+                'pasta', 'bread', 'milk', 'beef', 'chicken', 'rice', 'cheese', 
+                'eggs', 'butter', 'oil', 'tomato', 'onion', 'garlic', 'lettuce',
+                'potato', 'carrot', 'apple', 'banana', 'yogurt', 'salmon',
+                'tuna', 'pork', 'turkey', 'spinach', 'mushroom', 'pepper'
+            ];
             
-Return ONLY valid JSON with no additional text:
+            const ingredients = commonIngredients.filter(ingredient => 
+                mealDescription.toLowerCase().includes(ingredient)
+            );
 
-{
-  "meal_name": "dish name",
-  "ingredients": ["ingredient1", "ingredient2"],
-  "estimated_portions": {
-    "ingredient1": 0.5,
-    "ingredient2": 1.0
-  }
-}
+            // Simple estimated portions
+            const estimated_portions = {};
+            ingredients.forEach(ingredient => {
+                estimated_portions[ingredient] = 0.5; // Default portion
+            });
 
-Focus on main grocery ingredients only.`;
-
-            try {
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: 'gpt-4o-mini',
-                        messages: [{ role: 'user', content: prompt }],
-                        max_tokens: 300,
-                        temperature: 0.1
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('OpenAI Text API Response:', response.status, errorText);
-                    throw new Error(`API responded with ${response.status}`);
+            return {
+                success: true,
+                data: {
+                    meal_name: mealDescription.slice(0, 50) + (mealDescription.length > 50 ? '...' : ''),
+                    ingredients: ingredients,
+                    estimated_portions: estimated_portions
                 }
-
-                const data = await response.json();
-                
-                if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                    throw new Error('Invalid response format from OpenAI');
-                }
-                
-                let content = data.choices[0].message.content.trim();
-                
-                // Clean up response
-                content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-                content = content.replace(/^[^{]*({.*})[^}]*$/s, '$1');
-                
-                console.log('Cleaned Text AI Response:', content);
-                
-                const parsedData = JSON.parse(content);
-                
-                if (!parsedData.ingredients || !Array.isArray(parsedData.ingredients)) {
-                    throw new Error('Invalid meal format: missing ingredients');
-                }
-                
-                return {
-                    success: true,
-                    data: parsedData
-                };
-            } catch (error) {
-                console.error('OpenAI Text Error:', error);
-                return {
-                    success: false,
-                    error: `Text analysis failed: ${error.message}`
-                };
-            }
+            };
         }
 
         // Data Processing
         function processReceiptData(receiptData) {
+            console.log('Processing receipt data:', receiptData);
+            
             // Add to receipts list
             receipts.unshift({
                 id: Date.now(),
@@ -1252,14 +1175,18 @@ Focus on main grocery ingredients only.`;
 
             // Update inventory
             receiptData.items.forEach(item => {
-                const existing = inventory.find(inv => 
+                console.log('Processing item:', item);
+                
+                const existingIndex = inventory.findIndex(inv => 
                     inv.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0]) ||
                     item.name.toLowerCase().includes(inv.name.toLowerCase().split(' ')[0])
                 );
 
-                if (existing) {
-                    existing.quantity += item.quantity;
+                if (existingIndex !== -1) {
+                    console.log('Found existing item, updating quantity');
+                    inventory[existingIndex].quantity += item.quantity;
                 } else {
+                    console.log('Adding new item to inventory');
                     inventory.push({
                         id: Date.now() + Math.random(),
                         name: item.name,
@@ -1271,13 +1198,23 @@ Focus on main grocery ingredients only.`;
                 }
             });
 
-            // Save to localStorage
+            console.log('Updated inventory:', inventory);
+            
+            // Save to localStorage immediately
             saveToStorage();
+            
+            // Update UI
             updateUI();
+            
+            // Add notification
             addNotification(`Receipt processed! Added ${receiptData.items.length} items to inventory`, 'success');
+            
+            console.log('Receipt processing complete');
         }
 
         function processMealData(mealData) {
+            console.log('Processing meal data:', mealData);
+            
             // Add to meals list
             meals.unshift({
                 id: Date.now(),
@@ -1287,21 +1224,29 @@ Focus on main grocery ingredients only.`;
 
             // Update inventory by reducing quantities
             mealData.ingredients.forEach(ingredient => {
-                const item = inventory.find(inv => 
+                const itemIndex = inventory.findIndex(inv => 
                     inv.name.toLowerCase().includes(ingredient.toLowerCase()) ||
                     ingredient.toLowerCase().includes(inv.name.toLowerCase().split(' ')[0])
                 );
 
-                if (item) {
+                if (itemIndex !== -1) {
                     const portion = mealData.estimated_portions[ingredient] || 0.5;
-                    item.quantity = Math.max(0, item.quantity - portion);
+                    const oldQuantity = inventory[itemIndex].quantity;
+                    inventory[itemIndex].quantity = Math.max(0, inventory[itemIndex].quantity - portion);
+                    console.log(`Updated ${inventory[itemIndex].name} from ${oldQuantity} to ${inventory[itemIndex].quantity}`);
                 }
             });
 
-            // Save to localStorage
+            // Save to localStorage immediately
             saveToStorage();
+            
+            // Update UI
             updateUI();
+            
+            // Check for low stock
             checkLowStock();
+            
+            console.log('Meal processing complete');
         }
 
         function showMockReceiptResult() {
@@ -1335,6 +1280,8 @@ Focus on main grocery ingredients only.`;
         }
 
         function updateInventoryDisplay() {
+            console.log('Updating inventory display with', inventory.length, 'items');
+            
             const container = document.getElementById('inventory-list');
             container.innerHTML = '';
 
@@ -1360,8 +1307,7 @@ Focus on main grocery ingredients only.`;
                 container.appendChild(div);
             });
             
-            // Save inventory changes to localStorage
-            saveToStorage();
+            console.log('Inventory display updated');
         }
 
         function checkLowStock() {
@@ -1375,6 +1321,8 @@ Focus on main grocery ingredients only.`;
         }
 
         function addNotification(message, type = 'warning') {
+            console.log('Adding notification:', message, type);
+            
             const notification = {
                 id: Date.now(),
                 message: message,
@@ -1385,7 +1333,7 @@ Focus on main grocery ingredients only.`;
             // Add to notifications array
             notifications.unshift(notification);
 
-            // Save to localStorage
+            // Save to localStorage immediately
             saveToStorage();
 
             // Add to home notifications
@@ -1402,13 +1350,17 @@ Focus on main grocery ingredients only.`;
             const allNotifications = document.getElementById('all-notifications');
             const allDiv = div.cloneNode(true);
             allNotifications.insertBefore(allDiv, allNotifications.firstChild);
+            
+            console.log('Notification added successfully');
         }
 
         function clearAllNotifications() {
+            console.log('Clearing all notifications');
+            
             // Clear notifications array
             notifications.length = 0;
             
-            // Save to localStorage
+            // Save to localStorage immediately
             saveToStorage();
             
             // Clear home notifications
@@ -1420,6 +1372,7 @@ Focus on main grocery ingredients only.`;
             allNotifications.innerHTML = '<div style="padding: 16px; text-align: center; color: #6b7280;"><p>No notifications</p></div>';
             
             showToast('✅ All notifications cleared!');
+            console.log('All notifications cleared');
         }
 
         // Tab navigation
