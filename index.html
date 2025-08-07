@@ -553,6 +553,12 @@
                 <!-- Test API Button -->
                 <button class="test-btn" onclick="testAPIConnection()">🧪 Test AI Connection</button>
                 
+                <!-- Debug Tools -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0;">
+                    <button onclick="checkVercelLogs()" style="background: #8b5cf6; color: white; border: none; padding: 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">📋 Check Logs</button>
+                    <button onclick="clearDebugInfo()" style="background: #6b7280; color: white; border: none; padding: 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">🧹 Clear Debug</button>
+                </div>
+                
                 <!-- Debug Information -->
                 <div id="debug-info" class="debug-info">
                     <strong>Debug Info:</strong><br>
@@ -815,25 +821,37 @@
         // API Call Functions
         async function callOpenAIVision(base64Image, type) {
             console.log('🔍 Calling AI analysis API...');
+            console.log('Image data length:', base64Image.length);
+            console.log('Analysis type:', type);
             
             try {
+                const requestBody = {
+                    image: base64Image,
+                    type: type
+                };
+                
+                console.log('Sending request to /api/analyze');
+                
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        image: base64Image,
-                        type: type
-                    })
+                    body: JSON.stringify(requestBody)
                 });
+
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
                 if (!response.ok) {
                     let errorData;
                     try {
                         errorData = await response.json();
+                        console.error('Error response JSON:', errorData);
                     } catch (e) {
-                        errorData = { error: await response.text() };
+                        const errorText = await response.text();
+                        console.error('Error response text:', errorText);
+                        errorData = { error: errorText };
                     }
                     
                     console.error('❌ API Error:', response.status, errorData);
@@ -841,15 +859,19 @@
                 }
 
                 const data = await response.json();
+                console.log('Success response:', data);
                 
                 if (!data.success) {
+                    console.error('API returned success=false:', data);
                     throw new Error(data.error || 'Analysis failed');
                 }
                 
+                console.log('✅ Analysis successful!');
                 return { success: true, data: data.data };
                 
             } catch (error) {
-                console.error('🚨 API Error:', error);
+                console.error('🚨 API Call Error:', error);
+                console.error('Error stack:', error.stack);
                 return { success: false, error: error.message };
             }
         }
@@ -862,19 +884,58 @@
             btn.innerHTML = '<span class="loading"></span> Analyzing...';
             
             try {
+                console.log('📸 Starting receipt analysis...');
+                console.log('File info:', {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type
+                });
+
+                // Validate file
+                if (!file.type.startsWith('image/')) {
+                    throw new Error('Please select an image file');
+                }
+
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    throw new Error('Image too large. Please use an image under 10MB.');
+                }
+
+                showToast('📸 Converting image...');
+                
                 const base64 = await fileToBase64(file);
+                console.log('✅ Image converted to base64, length:', base64.length);
+
+                if (base64.length < 100) {
+                    throw new Error('Image appears to be too small or corrupted');
+                }
+
+                showToast('🤖 Analyzing with AI...');
+                
                 const result = await callOpenAIVision(base64, 'receipt');
                 
                 if (result.success) {
+                    console.log('✅ Receipt analysis successful:', result.data);
                     processReceiptData(result.data);
                     showToast('✅ Receipt analyzed! Items added to inventory.');
                 } else {
-                    console.error('AI Analysis Error:', result.error);
-                    showToast('❌ AI analysis failed: ' + result.error);
+                    console.error('❌ Receipt analysis failed:', result.error);
+                    showToast('❌ Analysis failed: ' + result.error);
+                    
+                    // Show more detailed error in debug
+                    const debugDiv = document.getElementById('debug-info');
+                    const debugContent = document.getElementById('debug-content');
+                    debugDiv.style.display = 'block';
+                    debugContent.innerHTML += `<br>❌ Receipt Error: ${result.error}<br>`;
                 }
             } catch (error) {
-                console.error('Receipt analysis error:', error);
-                showToast('❌ Error processing receipt: ' + error.message);
+                console.error('🚨 Receipt analysis error:', error);
+                showToast('❌ Error: ' + error.message);
+                
+                // Show error in debug
+                const debugDiv = document.getElementById('debug-info');
+                const debugContent = document.getElementById('debug-content');
+                debugDiv.style.display = 'block';
+                debugContent.innerHTML += `<br>🚨 Receipt Error: ${error.message}<br>`;
             }
             
             btn.textContent = originalText;
@@ -982,13 +1043,45 @@
         // Utility functions
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
+                console.log('📁 Converting file to base64...');
+                
                 const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => {
-                    const base64 = reader.result.split(',')[1];
-                    resolve(base64);
+                
+                reader.onload = function() {
+                    try {
+                        const result = reader.result;
+                        console.log('📁 FileReader result type:', typeof result);
+                        console.log('📁 FileReader result length:', result ? result.length : 'null');
+                        
+                        if (!result || typeof result !== 'string') {
+                            reject(new Error('Failed to read file'));
+                            return;
+                        }
+                        
+                        // Extract base64 data (remove data:image/...;base64, prefix)
+                        const base64Match = result.match(/^data:image\/[^;]+;base64,(.+)$/);
+                        if (!base64Match) {
+                            reject(new Error('Invalid image format'));
+                            return;
+                        }
+                        
+                        const base64 = base64Match[1];
+                        console.log('✅ Base64 conversion successful, length:', base64.length);
+                        console.log('📁 First 50 chars:', base64.substring(0, 50));
+                        
+                        resolve(base64);
+                    } catch (error) {
+                        console.error('❌ Error processing FileReader result:', error);
+                        reject(error);
+                    }
                 };
-                reader.onerror = error => reject(error);
+                
+                reader.onerror = function(error) {
+                    console.error('❌ FileReader error:', error);
+                    reject(new Error('Failed to read file: ' + error.message));
+                };
+                
+                reader.readAsDataURL(file);
             });
         }
 
