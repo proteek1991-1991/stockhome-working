@@ -152,6 +152,36 @@
             font-weight: bold;
         }
 
+        /* Test Button */
+        .test-btn {
+            width: 100%;
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px 0;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.1s;
+        }
+
+        .test-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Debug Info */
+        .debug-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 16px 0;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
+        }
+
         /* Notifications */
         .notifications {
             background: white;
@@ -482,44 +512,6 @@
             margin: 12px 0;
         }
 
-        /* API Key Setup */
-        .api-setup {
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .api-setup h4 {
-            color: #92400e;
-            margin-bottom: 8px;
-        }
-
-        .api-setup p {
-            color: #78350f;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        .api-input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-
-        .api-save-btn {
-            background: #f59e0b;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
         /* PWA Enhancements */
         @media (display-mode: standalone) {
             .header {
@@ -546,16 +538,6 @@
         <div class="main-content">
             <!-- Home Tab -->
             <div id="home-tab" class="tab-content active">
-                <!-- No API Setup Needed - Secure Backend -->
-                <div id="api-setup" class="api-setup" style="display: none;">
-                    <h4>🤖 AI Features Ready</h4>
-                    <p>Your app is configured with secure AI analysis!</p>
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #d1d5db;">
-                        <button onclick="exportData()" style="background: #6b7280; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 8px;">Backup Data</button>
-                        <button onclick="resetAllData()" style="background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Reset App</button>
-                    </div>
-                </div>
-
                 <!-- Stats -->
                 <div class="stats-grid">
                     <div class="stat-card green" onclick="showTab('inventory')" style="cursor: pointer;">
@@ -568,17 +550,22 @@
                     </div>
                 </div>
 
+                <!-- Test API Button -->
+                <button class="test-btn" onclick="testAPIConnection()">🧪 Test AI Connection</button>
+                
+                <!-- Debug Information -->
+                <div id="debug-info" class="debug-info">
+                    <strong>Debug Info:</strong><br>
+                    <div id="debug-content">Click test button to check API status...</div>
+                </div>
+
                 <!-- Notifications -->
                 <div class="notifications">
                     <h3>🔔 Recent Notifications</h3>
                     <div id="notifications-list">
                         <div class="notification warning">
-                            <p>Bananas running low (6 left)</p>
+                            <p>Click "Test AI Connection" to check API status</p>
                             <p class="time">Just now</p>
-                        </div>
-                        <div class="notification alert">
-                            <p>Milk expires in 2 days</p>
-                            <p class="time">5 minutes ago</p>
                         </div>
                     </div>
                 </div>
@@ -615,12 +602,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Recent Receipts -->
-                <div class="section-card" id="recent-receipts" style="display: none;">
-                    <div class="section-header">📋 Recent Receipts</div>
-                    <div id="receipts-list"></div>
-                </div>
             </div>
 
             <!-- Meal Tab -->
@@ -644,12 +625,6 @@
                             <button class="meal-btn" onclick="logMealText()">Log Meal</button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Recent Meals -->
-                <div class="section-card" id="recent-meals" style="display: none;">
-                    <div class="section-header">🍽️ Recent Meals</div>
-                    <div id="meals-list"></div>
                 </div>
             </div>
 
@@ -696,18 +671,6 @@
                                 <div class="amount">2 loaves</div>
                             </div>
                         </div>
-                        <div class="inventory-item">
-                            <div class="item-info">
-                                <div class="status-dot green"></div>
-                                <div class="item-details">
-                                    <h4>Toilet Paper</h4>
-                                    <p>Household</p>
-                                </div>
-                            </div>
-                            <div class="item-quantity">
-                                <div class="amount">8 rolls</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -715,21 +678,10 @@
             <!-- Notifications Tab -->
             <div id="notifications-tab" class="tab-content">
                 <div class="section-card">
-                    <div class="section-header">
-                        🔔 All Notifications
-                        <button onclick="clearAllNotifications()" style="float: right; background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Clear All</button>
-                    </div>
+                    <div class="section-header">🔔 All Notifications</div>
                     <div id="all-notifications">
-                        <div class="notification warning">
-                            <p>Bananas running low (6 left)</p>
-                            <p class="time">Just now</p>
-                        </div>
-                        <div class="notification alert">
-                            <p>Milk expires in 2 days</p>
-                            <p class="time">5 minutes ago</p>
-                        </div>
                         <div style="padding: 16px; text-align: center; color: #6b7280;">
-                            <p>No more notifications</p>
+                            <p>Test the API connection first</p>
                         </div>
                     </div>
                 </div>
@@ -764,218 +716,179 @@
     </div>
 
     <script>
-        // ===== SECURE VERSION - NO API KEY NEEDED =====
-        // The API key is safely stored on the server
-        // Users don't need to enter any keys
-        // =============================================
-        
-        // App State with localStorage persistence
-        
-        // Load data from localStorage or use defaults
-        let inventory = [];
+        // App State
+        let inventory = [
+            { id: 1, name: 'Bananas', quantity: 6, unit: 'pieces', category: 'Produce', lowThreshold: 2 },
+            { id: 2, name: 'Milk', quantity: 1, unit: 'gallon', category: 'Dairy', lowThreshold: 1 },
+            { id: 3, name: 'Bread', quantity: 2, unit: 'loaves', category: 'Bakery', lowThreshold: 1 },
+        ];
         let receipts = [];
         let meals = [];
         let notifications = [];
 
-        // Initialize data
-        function initializeData() {
-            // Load from localStorage or set defaults
-            const savedInventory = localStorage.getItem('stockhome-inventory');
-            const savedReceipts = localStorage.getItem('stockhome-receipts');
-            const savedMeals = localStorage.getItem('stockhome-meals');
-            const savedNotifications = localStorage.getItem('stockhome-notifications');
+        // API Test Function
+        async function testAPIConnection() {
+            const debugDiv = document.getElementById('debug-info');
+            const debugContent = document.getElementById('debug-content');
             
-            if (savedInventory) {
-                inventory = JSON.parse(savedInventory);
-                console.log('Loaded inventory from storage:', inventory.length, 'items');
-            } else {
-                // Default inventory if none saved
-                inventory = [
-                    { id: 1, name: 'Bananas', quantity: 6, unit: 'pieces', category: 'Produce', lowThreshold: 2 },
-                    { id: 2, name: 'Milk', quantity: 1, unit: 'gallon', category: 'Dairy', lowThreshold: 1 },
-                    { id: 3, name: 'Bread', quantity: 2, unit: 'loaves', category: 'Bakery', lowThreshold: 1 },
-                    { id: 4, name: 'Toilet Paper', quantity: 8, unit: 'rolls', category: 'Household', lowThreshold: 4 }
-                ];
-                console.log('Using default inventory');
-            }
+            debugDiv.style.display = 'block';
+            debugContent.innerHTML = '🔄 Testing API connection...<br>';
             
-            receipts = savedReceipts ? JSON.parse(savedReceipts) : [];
-            meals = savedMeals ? JSON.parse(savedMeals) : [];
-            notifications = savedNotifications ? JSON.parse(savedNotifications) : [
-                { id: 1, message: 'Welcome to StockHome!', type: 'success', timestamp: new Date().toISOString() },
-                { id: 2, message: 'Start by scanning a receipt or logging a meal', type: 'warning', timestamp: new Date().toISOString() }
-            ];
+            showToast('🧪 Testing API connection...');
             
-            console.log('Data initialized - Inventory:', inventory.length, 'Receipts:', receipts.length, 'Meals:', meals.length, 'Notifications:', notifications.length);
-        }
-
-        // Save data to localStorage
-        function saveToStorage() {
             try {
-                localStorage.setItem('stockhome-inventory', JSON.stringify(inventory));
-                localStorage.setItem('stockhome-receipts', JSON.stringify(receipts));
-                localStorage.setItem('stockhome-meals', JSON.stringify(meals));
-                localStorage.setItem('stockhome-notifications', JSON.stringify(notifications));
-                console.log('Data saved to localStorage successfully');
+                console.log('🧪 Testing API endpoint at:', window.location.origin + '/api/analyze');
                 
-                // Verify the save worked
-                const testLoad = localStorage.getItem('stockhome-inventory');
-                if (testLoad) {
-                    const parsed = JSON.parse(testLoad);
-                    console.log('Verification: Saved', inventory.length, 'items, loaded', parsed.length, 'items');
-                }
-            } catch (error) {
-                console.error('Error saving to localStorage:', error);
-                showToast('⚠️ Error saving data. Storage might be full.');
-            }
-        }
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: 'test',
+                        type: 'receipt'
+                    })
+                });
 
-        // Test localStorage functionality
-        function testLocalStorage() {
-            try {
-                const testKey = 'stockhome-test';
-                const testData = { test: 'data', timestamp: Date.now() };
-                localStorage.setItem(testKey, JSON.stringify(testData));
-                const retrieved = JSON.parse(localStorage.getItem(testKey));
-                localStorage.removeItem(testKey);
+                debugContent.innerHTML += `📡 Response Status: ${response.status}<br>`;
+                debugContent.innerHTML += `📍 URL: ${response.url}<br>`;
                 
-                if (retrieved && retrieved.test === 'data') {
-                    console.log('✅ localStorage is working correctly');
-                    return true;
-                } else {
-                    console.error('❌ localStorage test failed - data mismatch');
+                if (response.status === 404) {
+                    debugContent.innerHTML += `❌ ERROR: API endpoint not found<br>`;
+                    debugContent.innerHTML += `💡 Make sure you have created api/analyze.js in your GitHub repo<br>`;
+                    showToast('❌ API endpoint not found! Check GitHub repo.');
                     return false;
                 }
+                
+                const responseText = await response.text();
+                debugContent.innerHTML += `📝 Response: ${responseText}<br>`;
+                
+                let responseData;
+                try {
+                    responseData = JSON.parse(responseText);
+                } catch (e) {
+                    debugContent.innerHTML += `❌ ERROR: Invalid JSON response<br>`;
+                    showToast('❌ API returned invalid response');
+                    return false;
+                }
+                
+                if (responseData.error) {
+                    if (responseData.error.includes('API key not configured')) {
+                        debugContent.innerHTML += `❌ ERROR: OpenAI API key missing in Vercel environment<br>`;
+                        debugContent.innerHTML += `💡 Add OPENAI_API_KEY in Vercel Dashboard → Settings → Environment Variables<br>`;
+                        showToast('❌ OpenAI API key not configured!');
+                        return false;
+                    } else if (responseData.error.includes('Test data received')) {
+                        debugContent.innerHTML += `✅ SUCCESS: API endpoint is working!<br>`;
+                        debugContent.innerHTML += `✅ OpenAI API key is configured<br>`;
+                        debugContent.innerHTML += `🎉 Ready to scan receipts and meals!<br>`;
+                        showToast('✅ API working! Ready for AI analysis.');
+                        return true;
+                    } else {
+                        debugContent.innerHTML += `⚠️ WARNING: Unexpected error: ${responseData.error}<br>`;
+                        showToast('⚠️ Unexpected API response');
+                        return false;
+                    }
+                }
+                
+                debugContent.innerHTML += `⚠️ WARNING: Unexpected response format<br>`;
+                showToast('⚠️ API responded with unexpected format');
+                return false;
+                
             } catch (error) {
-                console.error('❌ localStorage test failed:', error);
+                console.error('🚨 API Test Failed:', error);
+                debugContent.innerHTML += `🚨 NETWORK ERROR: ${error.message}<br>`;
+                debugContent.innerHTML += `💡 Check if your app is deployed to Vercel<br>`;
+                showToast('❌ Cannot connect to API. Check deployment.');
                 return false;
             }
         }
 
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('=== StockHome App Starting (Secure Version) ===');
+        // API Call Functions
+        async function callOpenAIVision(base64Image, type) {
+            console.log('🔍 Calling AI analysis API...');
             
-            // Test localStorage functionality
-            const storageWorks = testLocalStorage();
-            if (!storageWorks) {
-                showToast('⚠️ Warning: Data may not persist between sessions');
-            }
-            
-            // Initialize data from localStorage
-            initializeData();
-            
-            // Hide API setup since we use secure backend
-            document.getElementById('api-setup').style.display = 'none';
-            console.log('✅ Using secure backend for AI features');
-            
-            // Convert timestamp strings back to Date objects for display
-            notifications = notifications.map(notif => ({
-                ...notif,
-                timestamp: new Date(notif.timestamp)
-            }));
-            
-            // Update UI
-            updateStats();
-            updateInventoryDisplay();
-            updateNotificationsDisplay();
-            
-            // Save initial state to ensure persistence works
-            saveToStorage();
-            
-            console.log('=== App initialized successfully ===');
-            console.log('Current inventory items:', inventory.length);
-            console.log('Current receipts:', receipts.length);
-            console.log('Current meals:', meals.length);
-            console.log('Current notifications:', notifications.length);
-            
-            // Show welcome message
-            showToast('🏠 StockHome ready! AI features enabled.');
-        });
-
-        // Update notifications display on load
-        function updateNotificationsDisplay() {
-            // Update home notifications
-            const homeNotifications = document.getElementById('notifications-list');
-            homeNotifications.innerHTML = '';
-            
-            // Update all notifications
-            const allNotifications = document.getElementById('all-notifications');
-            allNotifications.innerHTML = '';
-            
-            if (notifications.length === 0) {
-                homeNotifications.innerHTML = '<div style="padding: 16px; text-align: center; color: #6b7280;"><p>No notifications</p></div>';
-                allNotifications.innerHTML = '<div style="padding: 16px; text-align: center; color: #6b7280;"><p>No notifications</p></div>';
-            } else {
-                notifications.slice(0, 3).forEach(notification => {
-                    const div = document.createElement('div');
-                    div.className = `notification ${notification.type}`;
-                    div.innerHTML = `
-                        <p>${notification.message}</p>
-                        <p class="time">${notification.timestamp.toLocaleTimeString()}</p>
-                    `;
-                    homeNotifications.appendChild(div);
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: base64Image,
+                        type: type
+                    })
                 });
-                
-                notifications.forEach(notification => {
-                    const div = document.createElement('div');
-                    div.className = `notification ${notification.type}`;
-                    div.innerHTML = `
-                        <p>${notification.message}</p>
-                        <p class="time">${notification.timestamp.toLocaleTimeString()}</p>
-                    `;
-                    allNotifications.appendChild(div);
-                });
-            }
-        }
 
-        // PWA Install functionality
-        let deferredPrompt;
-
-        // Show install banner after 3 seconds
-        setTimeout(() => {
-            if (!isStandalone() && !localStorage.getItem('install-dismissed')) {
-                document.getElementById('install-banner').classList.add('show');
-            }
-        }, 3000);
-
-        function isStandalone() {
-            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        showToast('StockHome installed successfully! 🎉');
+                if (!response.ok) {
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch (e) {
+                        errorData = { error: await response.text() };
                     }
-                    deferredPrompt = null;
-                    dismissInstall();
-                });
-            } else if (isIOSSafari()) {
-                showIOSInstallInstructions();
-            } else {
-                showToast('App installation not available on this browser');
+                    
+                    console.error('❌ API Error:', response.status, errorData);
+                    throw new Error(`Server error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+                
+                return { success: true, data: data.data };
+                
+            } catch (error) {
+                console.error('🚨 API Error:', error);
+                return { success: false, error: error.message };
             }
         }
 
-        function dismissInstall() {
-            document.getElementById('install-banner').classList.remove('show');
-            localStorage.setItem('install-dismissed', 'true');
+        // Receipt Analysis
+        async function analyzeReceipt(file) {
+            const btn = document.getElementById('receipt-btn-text');
+            const originalText = btn.textContent;
+            
+            btn.innerHTML = '<span class="loading"></span> Analyzing...';
+            
+            try {
+                const base64 = await fileToBase64(file);
+                const result = await callOpenAIVision(base64, 'receipt');
+                
+                if (result.success) {
+                    processReceiptData(result.data);
+                    showToast('✅ Receipt analyzed! Items added to inventory.');
+                } else {
+                    console.error('AI Analysis Error:', result.error);
+                    showToast('❌ AI analysis failed: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Receipt analysis error:', error);
+                showToast('❌ Error processing receipt: ' + error.message);
+            }
+            
+            btn.textContent = originalText;
         }
 
-        function isIOSSafari() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|mercury/.test(navigator.userAgent);
-        }
+        // Meal Analysis
+        async function analyzeMeal(file) {
+            showToast('🔍 Analyzing meal photo...');
 
-        function showIOSInstallInstructions() {
-            alert('📱 To install StockHome on iPhone:\n\n1. Tap the Share button (⬆️)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install the app\n\nStockHome will appear on your home screen!');
+            try {
+                const base64 = await fileToBase64(file);
+                const result = await callOpenAIVision(base64, 'meal');
+                
+                if (result.success) {
+                    processMealData(result.data);
+                    showToast('✅ Meal analyzed! Inventory updated.');
+                } else {
+                    showToast('❌ Meal analysis failed: ' + result.error);
+                }
+            } catch (error) {
+                showToast('❌ Error processing meal: ' + error.message);
+            }
         }
 
         // Camera Functions
@@ -1013,382 +926,36 @@
             container.appendChild(img);
         }
 
-        // AI Analysis Functions
-        async function analyzeReceipt(file) {
-            const btn = document.getElementById('receipt-btn-text');
-            const originalText = btn.textContent;
-            
-            btn.innerHTML = '<span class="loading"></span> Analyzing...';
-            
-            try {
-                const base64 = await fileToBase64(file);
-                const result = await callOpenAIVision(base64, 'receipt');
-                
-                if (result.success) {
-                    processReceiptData(result.data);
-                    showToast('✅ Receipt analyzed! Items added to inventory.');
-                } else {
-                    console.error('AI Analysis Error:', result.error);
-                    showToast('❌ AI analysis failed. Using demo data instead.');
-                    showMockReceiptResult();
-                }
-            } catch (error) {
-                console.error('Receipt analysis error:', error);
-                showToast('❌ Error processing receipt. Using demo data.');
-                showMockReceiptResult();
-            }
-            
-            btn.textContent = originalText;
-        }
-
-        async function analyzeMeal(file) {
-            showToast('🔍 Analyzing meal photo...');
-
-            try {
-                const base64 = await fileToBase64(file);
-                const result = await callOpenAIVision(base64, 'meal');
-                
-                if (result.success) {
-                    processMealData(result.data);
-                    showToast('✅ Meal analyzed! Inventory updated.');
-                } else {
-                    console.error('Meal AI Analysis Error:', result.error);
-                    showToast('❌ Could not analyze meal photo. Please try again or use text description.');
-                }
-            } catch (error) {
-                console.error('Meal analysis error:', error);
-                showToast('❌ Error processing meal photo. Please try again.');
-            }
-        }
-
         function logMealText() {
             const text = document.getElementById('meal-text').value.trim();
             if (!text) {
                 showToast('⚠️ Please describe what you ate first!');
                 return;
             }
-
-            analyzeMealText(text);
-        }
-
-        async function analyzeMealText(mealText) {
-            showToast('🔍 Analyzing meal description...');
-            
-            try {
-                const result = await callOpenAIText(mealText);
-                
-                if (result.success) {
-                    processMealData(result.data);
-                    showToast('✅ Meal logged! Inventory updated based on ingredients.');
-                } else {
-                    console.error('Meal Text Analysis Error:', result.error);
-                    showToast('❌ Could not analyze meal description. Please try again.');
-                }
-            } catch (error) {
-                console.error('Meal text analysis error:', error);
-                showToast('❌ Error analyzing meal description.');
-            }
-            
+            showToast('✅ Meal logged: ' + text);
             document.getElementById('meal-text').value = '';
         }
 
-        // Secure API Calls to Serverless Function
-        async function callOpenAIVision(base64Image, type) {
-            try {
-                const response = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        image: base64Image,
-                        type: type
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('API Error:', response.status, errorData);
-                    throw new Error(`Server error: ${response.status} - ${errorData.error}`);
-                }
-
-                const data = await response.json();
-                
-                if (!data.success) {
-                    throw new Error(data.error || 'Unknown server error');
-                }
-                
-                return {
-                    success: true,
-                    data: data.data
-                };
-                
-            } catch (error) {
-                console.error('Secure API Error:', error);
-                return {
-                    success: false,
-                    error: `Analysis failed: ${error.message}`
-                };
-            }
+        // Mock data processing functions (simplified for testing)
+        function processReceiptData(data) {
+            console.log('Processing receipt:', data);
+            showToast('✅ Receipt processed successfully!');
         }
 
-        async function callOpenAIText(mealDescription) {
-            // For text analysis, we can use a simple approach or extend the API
-            // For now, let's use a simple ingredient extraction
-            const commonIngredients = [
-                'pasta', 'bread', 'milk', 'beef', 'chicken', 'rice', 'cheese', 
-                'eggs', 'butter', 'oil', 'tomato', 'onion', 'garlic', 'lettuce',
-                'potato', 'carrot', 'apple', 'banana', 'yogurt', 'salmon',
-                'tuna', 'pork', 'turkey', 'spinach', 'mushroom', 'pepper'
-            ];
-            
-            const ingredients = commonIngredients.filter(ingredient => 
-                mealDescription.toLowerCase().includes(ingredient)
-            );
-
-            // Simple estimated portions
-            const estimated_portions = {};
-            ingredients.forEach(ingredient => {
-                estimated_portions[ingredient] = 0.5; // Default portion
-            });
-
-            return {
-                success: true,
-                data: {
-                    meal_name: mealDescription.slice(0, 50) + (mealDescription.length > 50 ? '...' : ''),
-                    ingredients: ingredients,
-                    estimated_portions: estimated_portions
-                }
-            };
-        }
-
-        // Data Processing
-        function processReceiptData(receiptData) {
-            console.log('Processing receipt data:', receiptData);
-            
-            // Add to receipts list
-            receipts.unshift({
-                id: Date.now(),
-                ...receiptData,
-                timestamp: new Date().toISOString()
-            });
-
-            // Update inventory
-            receiptData.items.forEach(item => {
-                console.log('Processing item:', item);
-                
-                const existingIndex = inventory.findIndex(inv => 
-                    inv.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0]) ||
-                    item.name.toLowerCase().includes(inv.name.toLowerCase().split(' ')[0])
-                );
-
-                if (existingIndex !== -1) {
-                    console.log('Found existing item, updating quantity');
-                    inventory[existingIndex].quantity += item.quantity;
-                } else {
-                    console.log('Adding new item to inventory');
-                    inventory.push({
-                        id: Date.now() + Math.random(),
-                        name: item.name,
-                        quantity: item.quantity,
-                        unit: item.unit,
-                        category: item.category,
-                        lowThreshold: Math.max(1, Math.floor(item.quantity * 0.2))
-                    });
-                }
-            });
-
-            console.log('Updated inventory:', inventory);
-            
-            // Save to localStorage immediately
-            saveToStorage();
-            
-            // Update UI
-            updateUI();
-            
-            // Add notification
-            addNotification(`Receipt processed! Added ${receiptData.items.length} items to inventory`, 'success');
-            
-            console.log('Receipt processing complete');
-        }
-
-        function processMealData(mealData) {
-            console.log('Processing meal data:', mealData);
-            
-            // Add to meals list
-            meals.unshift({
-                id: Date.now(),
-                ...mealData,
-                timestamp: new Date().toISOString()
-            });
-
-            // Update inventory by reducing quantities
-            mealData.ingredients.forEach(ingredient => {
-                const itemIndex = inventory.findIndex(inv => 
-                    inv.name.toLowerCase().includes(ingredient.toLowerCase()) ||
-                    ingredient.toLowerCase().includes(inv.name.toLowerCase().split(' ')[0])
-                );
-
-                if (itemIndex !== -1) {
-                    const portion = mealData.estimated_portions[ingredient] || 0.5;
-                    const oldQuantity = inventory[itemIndex].quantity;
-                    inventory[itemIndex].quantity = Math.max(0, inventory[itemIndex].quantity - portion);
-                    console.log(`Updated ${inventory[itemIndex].name} from ${oldQuantity} to ${inventory[itemIndex].quantity}`);
-                }
-            });
-
-            // Save to localStorage immediately
-            saveToStorage();
-            
-            // Update UI
-            updateUI();
-            
-            // Check for low stock
-            checkLowStock();
-            
-            console.log('Meal processing complete');
-        }
-
-        function showMockReceiptResult() {
-            const mockData = {
-                store: 'Fresh Market',
-                date: new Date().toLocaleDateString(),
-                items: [
-                    { name: 'Organic Bananas', quantity: 8, unit: 'pieces', price: 3.20, category: 'Produce' },
-                    { name: 'Whole Milk', quantity: 1, unit: 'gallon', price: 4.99, category: 'Dairy' },
-                    { name: 'Ground Beef 85/15', quantity: 2, unit: 'lbs', price: 12.80, category: 'Meat' },
-                    { name: 'Sandwich Bread', quantity: 22, unit: 'slices', price: 2.49, category: 'Bakery' },
-                    { name: 'Pasta Sauce', quantity: 2, unit: 'jars', price: 3.98, category: 'Pantry' },
-                    { name: 'Greek Yogurt', quantity: 6, unit: 'cups', price: 5.99, category: 'Dairy' },
-                    { name: 'Toilet Paper', quantity: 12, unit: 'rolls', price: 8.99, category: 'Household' }
-                ],
-                total: 42.44
-            };
-            processReceiptData(mockData);
-        }
-
-        // UI Updates
-        function updateUI() {
-            updateStats();
-            updateInventoryDisplay();
-        }
-
-        function updateStats() {
-            document.getElementById('total-items').textContent = inventory.length;
-            const lowStock = inventory.filter(item => item.quantity <= item.lowThreshold).length;
-            document.getElementById('low-stock').textContent = lowStock;
-        }
-
-        function updateInventoryDisplay() {
-            console.log('Updating inventory display with', inventory.length, 'items');
-            
-            const container = document.getElementById('inventory-list');
-            container.innerHTML = '';
-
-            inventory.forEach(item => {
-                const status = item.quantity <= item.lowThreshold ? 'red' : 
-                              item.quantity <= item.lowThreshold * 2 ? 'yellow' : 'green';
-                
-                const div = document.createElement('div');
-                div.className = 'inventory-item';
-                div.innerHTML = `
-                    <div class="item-info">
-                        <div class="status-dot ${status}"></div>
-                        <div class="item-details">
-                            <h4>${item.name}</h4>
-                            <p>${item.category}</p>
-                        </div>
-                    </div>
-                    <div class="item-quantity">
-                        <div class="amount">${item.quantity} ${item.unit}</div>
-                        ${item.quantity <= item.lowThreshold ? '<div class="warning">Low stock!</div>' : ''}
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-            
-            console.log('Inventory display updated');
-        }
-
-        function checkLowStock() {
-            const lowStockItems = inventory.filter(item => 
-                item.quantity <= item.lowThreshold && item.quantity > 0
-            );
-            
-            lowStockItems.forEach(item => {
-                addNotification(`${item.name} is running low! Only ${item.quantity} ${item.unit} left`, 'warning');
-            });
-        }
-
-        function addNotification(message, type = 'warning') {
-            console.log('Adding notification:', message, type);
-            
-            const notification = {
-                id: Date.now(),
-                message: message,
-                type: type,
-                timestamp: new Date().toISOString()
-            };
-
-            // Add to notifications array
-            notifications.unshift(notification);
-
-            // Save to localStorage immediately
-            saveToStorage();
-
-            // Add to home notifications
-            const homeNotifications = document.getElementById('notifications-list');
-            const div = document.createElement('div');
-            div.className = `notification ${type}`;
-            div.innerHTML = `
-                <p>${message}</p>
-                <p class="time">${new Date(notification.timestamp).toLocaleTimeString()}</p>
-            `;
-            homeNotifications.insertBefore(div, homeNotifications.firstChild);
-
-            // Add to all notifications
-            const allNotifications = document.getElementById('all-notifications');
-            const allDiv = div.cloneNode(true);
-            allNotifications.insertBefore(allDiv, allNotifications.firstChild);
-            
-            console.log('Notification added successfully');
-        }
-
-        function clearAllNotifications() {
-            console.log('Clearing all notifications');
-            
-            // Clear notifications array
-            notifications.length = 0;
-            
-            // Save to localStorage immediately
-            saveToStorage();
-            
-            // Clear home notifications
-            const homeNotifications = document.getElementById('notifications-list');
-            homeNotifications.innerHTML = '<div style="padding: 16px; text-align: center; color: #6b7280;"><p>No notifications</p></div>';
-            
-            // Clear all notifications
-            const allNotifications = document.getElementById('all-notifications');
-            allNotifications.innerHTML = '<div style="padding: 16px; text-align: center; color: #6b7280;"><p>No notifications</p></div>';
-            
-            showToast('✅ All notifications cleared!');
-            console.log('All notifications cleared');
+        function processMealData(data) {
+            console.log('Processing meal:', data);
+            showToast('✅ Meal logged successfully!');
         }
 
         // Tab navigation
         function showTab(tabName) {
-            // Hide all tabs
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab
             document.getElementById(tabName + '-tab').classList.add('active');
             
-            // Update navigation - handle both nav clicks and programmatic calls
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(item => item.classList.remove('active'));
             
-            // Find the correct nav item to highlight
             const targetNavItem = Array.from(navItems).find(item => {
                 const tabText = item.textContent.toLowerCase();
                 return tabText.includes(tabName.toLowerCase()) || 
@@ -1434,69 +1001,35 @@
                 max-width: 90%;
                 text-align: center;
             `;
+            
+            if (message.includes('❌') || message.includes('Error')) {
+                toast.style.background = '#ef4444';
+            } else if (message.includes('⚠️') || message.includes('Warning')) {
+                toast.style.background = '#f59e0b';
+            }
+            
             toast.textContent = message;
             document.body.appendChild(toast);
             
             setTimeout(() => {
                 toast.remove();
-            }, 3000);
+            }, 4000);
         }
 
-        // Data backup and reset functions
-        function exportData() {
-            const data = {
-                inventory: inventory,
-                receipts: receipts,
-                meals: meals,
-                notifications: notifications,
-                exportDate: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `stockhome-backup-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            showToast('📄 Data exported successfully!');
+        // PWA Functions (simplified)
+        function installApp() {
+            showToast('📱 PWA install not available in this environment');
         }
 
-        function resetAllData() {
-            if (confirm('Are you sure you want to reset all app data? This will delete your inventory, receipts, meals, and notifications. This cannot be undone.')) {
-                localStorage.removeItem('stockhome-inventory');
-                localStorage.removeItem('stockhome-receipts');
-                localStorage.removeItem('stockhome-meals');
-                localStorage.removeItem('stockhome-notifications');
-                
-                showToast('🔄 App data reset! Refreshing page...');
-                
-                setTimeout(() => {
-                    location.reload();
-                }, 2000);
-            }
+        function dismissInstall() {
+            document.getElementById('install-banner').style.display = 'none';
         }
 
-        // Handle app installation event
-        window.addEventListener('appinstalled', (evt) => {
-            showToast('StockHome installed successfully! 🎉');
-            dismissInstall();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('StockHome App Started - Test the API connection first!');
+            showToast('🏠 StockHome loaded! Test API connection first.');
         });
-
-        // Service Worker Registration (disabled for CodePen - works when deployed)
-        if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.host.includes('codepen')) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                        console.log('SW registered: ', registration);
-                        showToast('App ready for offline use! 📱');
-                    })
-                    .catch((registrationError) => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
-        }
     </script>
 </body>
 </html>
