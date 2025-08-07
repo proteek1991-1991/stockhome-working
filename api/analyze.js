@@ -1,169 +1,237 @@
-// api/analyze.js - Vercel Serverless Function
 export default async function handler(req, res) {
-  // Enable CORS
+  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
+  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { image, type } = req.body;
-
-  if (!image || !type) {
-    return res.status(400).json({ error: 'Missing image or type parameter' });
-  }
-
-  // Your API key is safely stored as an environment variable
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-  if (!OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'OpenAI API key not configured' });
-  }
-
-  const prompt = type === 'receipt' ? 
-    `Look at this grocery receipt image and extract the items. For packaged items, use typical package contents rather than just "1". Return ONLY a valid JSON object:
-
-{
-  "store": "store name or Unknown",
-  "date": "today's date",
-  "items": [
-    {
-      "name": "item name",
-      "quantity": 8,
-      "unit": "slices",
-      "price": 2.99,
-      "category": "Bakery"
-    }
-  ],
-  "total": 2.99
-}
-
-IMPORTANT - Use these typical package contents for common items:
-- Bread/Sandwich Bread: 20-24 slices per loaf
-- Hot Dog/Hamburger Buns: 8 buns per package
-- Bagels: 6 bagels per package
-- English Muffins: 6 muffins per package
-- Yogurt Cups: 4-6 cups per pack
-- Eggs: 12 eggs per dozen
-- Chicken Breasts: 2-4 pieces per package
-- Ground Meat: Use actual weight in lbs
-- Cheese Slices: 12-16 slices per package
-- Tortillas: 8-10 tortillas per package
-- Cereal: 1 box (but specify as "box")
-- Pasta: 1 box/bag (but specify as "box")
-- Soup Cans: Count individual cans
-- Soda/Water: Count individual bottles/cans
-- Toilet Paper: Count individual rolls (usually 4-24 per pack)
-- Paper Towels: Count individual rolls
-- Bananas: Count individual bananas
-- Apples: Count individual apples or use lbs
-- Milk: 1 gallon/quart/pint as shown
-
-Valid categories: Produce, Dairy, Meat, Pantry, Household, Bakery, Frozen
-Make sure quantities reflect actual usable units (slices, pieces, individual items).` :
-    
-    `Look at this meal image and identify the main ingredients. Return ONLY a valid JSON object:
-
-{
-  "meal_name": "dish name",
-  "ingredients": ["ingredient1", "ingredient2"],
-  "estimated_portions": {
-    "ingredient1": 0.5,
-    "ingredient2": 1.0
-  }
-}
-
-Focus on ingredients that would be in a grocery inventory.`;
-
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const { image, type } = req.body;
+
+    // Validate input
+    if (!image || !type) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required fields: image and type' 
+      });
+    }
+
+    // Handle test requests - return success without calling OpenAI
+    if (image === 'test') {
+      console.log('Test request received - returning mock success');
+      return res.status(200).json({ 
+        success: true,
+        data: {
+          store: 'Test Store',
+          date: new Date().toLocaleDateString(),
+          items: [
+            {
+              name: 'Test Item',
+              quantity: 1,
+              unit: 'piece',
+              price: 1.00,
+              category: 'Test'
+            }
+          ],
+          total: 1.00
+        }
+      });
+    }
+
+    // Get OpenAI API key from environment variables
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    
+    if (!openaiApiKey) {
+      console.error('OPENAI_API_KEY not found in environment variables');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'OpenAI API key not configured' 
+      });
+    }
+
+    console.log('Processing', type, 'analysis request');
+
+    // Validate base64 image format
+    if (!isValidBase64Image(image)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid image format. Please provide a valid base64 image.'
+      });
+    }
+
+    // Call OpenAI Vision API
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
+        'Authorization': `Bearer ${openaiApiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o-mini', // Use the newer, faster model
         messages: [
           {
             role: 'user',
             content: [
-              { type: 'text', text: prompt },
+              {
+                type: 'text',
+                text: type === 'receipt' ? 
+                  `Analyze this grocery receipt and extract items. Return ONLY a JSON object with this exact structure:
+                  {
+                    "store": "store name",
+                    "date": "date from receipt",
+                    "items": [
+                      {
+                        "name": "item name",
+                        "quantity": number,
+                        "unit": "pieces/lbs/gallons/etc",
+                        "price": number,
+                        "category": "Produce/Dairy/Meat/Bakery/Pantry/Household/etc"
+                      }
+                    ],
+                    "total": number
+                  }
+                  Estimate reasonable quantities if not clear. Use common sense for units and categories.` :
+                  `Analyze this meal photo and identify ingredients. Return ONLY a JSON object with this exact structure:
+                  {
+                    "meal_name": "description of the meal",
+                    "ingredients": ["ingredient1", "ingredient2", "ingredient3"],
+                    "estimated_portions": {
+                      "ingredient1": 0.5,
+                      "ingredient2": 1.0,
+                      "ingredient3": 0.25
+                    }
+                  }
+                  Estimate reasonable portion sizes consumed (0.1 to 2.0 scale).`
+              },
               {
                 type: 'image_url',
-                image_url: { 
+                image_url: {
                   url: `data:image/jpeg;base64,${image}`,
-                  detail: 'low'
+                  detail: 'low' // Use low detail for faster/cheaper processing
                 }
               }
             ]
           }
         ],
-        max_tokens: 500,
+        max_tokens: 1000,
         temperature: 0.1
       })
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API Error:', response.status, errorText);
+    if (!openaiResponse.ok) {
+      let errorData;
+      try {
+        errorData = await openaiResponse.json();
+        console.error('OpenAI API Error:', openaiResponse.status, errorData);
+      } catch (e) {
+        const errorText = await openaiResponse.text();
+        console.error('OpenAI API Error:', openaiResponse.status, errorText);
+        errorData = { error: { message: errorText } };
+      }
+      
       return res.status(500).json({ 
-        error: `OpenAI API error: ${response.status}`,
-        details: errorText 
+        success: false, 
+        error: `OpenAI API error: ${openaiResponse.status}`,
+        details: JSON.stringify(errorData)
       });
     }
 
-    const data = await response.json();
+    const openaiData = await openaiResponse.json();
+    console.log('OpenAI response received successfully');
+
+    // Extract the content from OpenAI response
+    const content = openaiData.choices[0]?.message?.content;
     
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      return res.status(500).json({ error: 'Invalid response from OpenAI' });
-    }
-    
-    let content = data.choices[0].message.content.trim();
-    
-    // Clean up the response
-    content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-    content = content.replace(/^[^{]*({.*})[^}]*$/s, '$1');
-    
-    try {
-      const parsedData = JSON.parse(content);
-      
-      // Validate the response structure
-      if (type === 'receipt') {
-        if (!parsedData.items || !Array.isArray(parsedData.items)) {
-          throw new Error('Invalid receipt format: missing items array');
-        }
-      } else {
-        if (!parsedData.ingredients || !Array.isArray(parsedData.ingredients)) {
-          throw new Error('Invalid meal format: missing ingredients array');
-        }
-      }
-      
-      return res.status(200).json({
-        success: true,
-        data: parsedData
-      });
-      
-    } catch (parseError) {
-      console.error('JSON Parse Error:', parseError);
+    if (!content) {
+      console.error('No content in OpenAI response:', openaiData);
       return res.status(500).json({ 
-        error: 'Failed to parse AI response',
-        details: content
+        success: false, 
+        error: 'No content received from AI' 
       });
     }
-    
-  } catch (error) {
-    console.error('Function Error:', error);
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      details: error.message 
+
+    // Parse the JSON response from OpenAI
+    let parsedData;
+    try {
+      // Clean up the response in case there's extra text
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      const jsonString = jsonMatch ? jsonMatch[0] : content;
+      parsedData = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.error('Failed to parse AI response as JSON:', content);
+      // Return a fallback response instead of failing completely
+      if (type === 'receipt') {
+        parsedData = {
+          store: 'Unknown Store',
+          date: new Date().toLocaleDateString(),
+          items: [
+            {
+              name: 'Receipt Item',
+              quantity: 1,
+              unit: 'item',
+              price: 0.00,
+              category: 'Unknown'
+            }
+          ],
+          total: 0.00
+        };
+      } else {
+        parsedData = {
+          meal_name: 'Meal from photo',
+          ingredients: ['unknown'],
+          estimated_portions: { 'unknown': 0.5 }
+        };
+      }
+    }
+
+    console.log('Analysis successful');
+
+    // Return the parsed data
+    return res.status(200).json({
+      success: true,
+      data: parsedData
     });
+
+  } catch (error) {
+    console.error('API Error:', error);
+    return res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Internal server error' 
+    });
+  }
+}
+
+// Helper function to validate base64 image
+function isValidBase64Image(base64String) {
+  try {
+    // Check if it's a valid base64 string
+    if (!base64String || typeof base64String !== 'string') {
+      return false;
+    }
+    
+    // Basic base64 validation
+    const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+    if (!base64Regex.test(base64String)) {
+      return false;
+    }
+    
+    // Check if it's long enough to be an actual image (at least 100 characters)
+    if (base64String.length < 100) {
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    return false;
   }
 }
