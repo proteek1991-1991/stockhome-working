@@ -761,7 +761,7 @@
                 }
                 
                 const responseText = await response.text();
-                debugContent.innerHTML += `📝 Response: ${responseText}<br>`;
+                debugContent.innerHTML += `📝 Response: ${responseText.slice(0, 200)}${responseText.length > 200 ? '...' : ''}<br>`;
                 
                 let responseData;
                 try {
@@ -772,21 +772,29 @@
                     return false;
                 }
                 
+                // Check for successful response
+                if (responseData.success === true) {
+                    debugContent.innerHTML += `✅ SUCCESS: API endpoint is working!<br>`;
+                    debugContent.innerHTML += `✅ OpenAI API key is configured<br>`;
+                    debugContent.innerHTML += `✅ Test data received successfully<br>`;
+                    debugContent.innerHTML += `🎉 Ready to scan receipts and meals!<br>`;
+                    showToast('✅ API working! Ready for AI analysis.');
+                    return true;
+                }
+                
+                // Handle error responses
                 if (responseData.error) {
                     if (responseData.error.includes('API key not configured')) {
                         debugContent.innerHTML += `❌ ERROR: OpenAI API key missing in Vercel environment<br>`;
                         debugContent.innerHTML += `💡 Add OPENAI_API_KEY in Vercel Dashboard → Settings → Environment Variables<br>`;
                         showToast('❌ OpenAI API key not configured!');
                         return false;
-                    } else if (responseData.error.includes('Test data received')) {
-                        debugContent.innerHTML += `✅ SUCCESS: API endpoint is working!<br>`;
-                        debugContent.innerHTML += `✅ OpenAI API key is configured<br>`;
-                        debugContent.innerHTML += `🎉 Ready to scan receipts and meals!<br>`;
-                        showToast('✅ API working! Ready for AI analysis.');
-                        return true;
                     } else {
-                        debugContent.innerHTML += `⚠️ WARNING: Unexpected error: ${responseData.error}<br>`;
-                        showToast('⚠️ Unexpected API response');
+                        debugContent.innerHTML += `⚠️ WARNING: API error: ${responseData.error}<br>`;
+                        if (responseData.details) {
+                            debugContent.innerHTML += `📋 Details: ${responseData.details}<br>`;
+                        }
+                        showToast('⚠️ API error: ' + responseData.error);
                         return false;
                     }
                 }
